@@ -9,6 +9,10 @@ const i = {
     },
     "bed":{
       "01": document.getElementById("bed01")
+    },
+    "spider":{
+      "netlu01":document.getElementById("netlu01")
+
     }
 
 
@@ -142,9 +146,6 @@ function draw() {
   // Erase Everything on Canvas
   c.clearRect(0, 0, canvas.width, canvas.height);
   // Set the fill colour to red
-  c.fillStyle = "red";
-  // Draw a rectangle at player's position with size of player's size
-  c.fillRect(player.x, player.y, player.width, player.height);
   // Set the fill colour to black
   c.fillStyle = "black";
   // Loop through level lines
@@ -165,11 +166,41 @@ function draw() {
         c.drawImage(i["floor"]["04"] ,col * 32, row * 32);
       }
       if (currentLevel[row][col] === "b") {       
-        c.drawImage(i["bed"]["01"] ,col * 32, row * 32);
+        c.drawImage(i["floor"]["01"] ,col * 32, row * 32);
+      }
+
+      if (currentLevel[row][col] === "n") {       
+        c.drawImage(i["spider"]["netlu01"] ,col * 32, row * 32);
       }
 
     }
   }
+
+  c.fillStyle = "red";
+  // Draw a rectangle at player's position with size of player's size
+  c.fillRect(player.x, player.y, player.width, player.height);
+
+  for (let row = 0; row < currentLevel.length; row++) {
+    // Loop through each character in line
+    for (let col = 0; col < currentLevel[0].length; col++) {
+            
+      if (currentLevel[row][col] === "b") {       
+        c.drawImage(i["bed"]["01"] ,col * 32, (row-1) * 32);
+      }
+
+    }
+  }
+
+
+
+
+}
+function isWall(a){
+  if(a=="1") return true;
+  if(a=="2") return true;
+  if(a=="3") return true;
+  if(a=="4") return true;
+  return false;
 }
 
 function parseLevel(lvl) {
@@ -236,16 +267,46 @@ function randomLevel(){
       }
     }
   }
+
   for (let j = 0; j < 16; j++){
-      l[j][0] = "4";   
-      l[j][15] = "4";
-      l[15][j] = "4";
+    l[j][0] = "4";   
+    l[j][15] = "4";
+    l[15][j] = "4";
   }
+  l[0][1] = "4";   
+  l[0][2] = "3";   
+  l[1][1] = "0";   
+
+
+  for (let i = 1; i < 15; i++){
+    for (let j = 1; j < 15; j++){
+      const random = Math.random();
+      
+        if(isWall(l[i-1][j])){
+          if(isWall(l[i][j-1])){            
+            if(!isWall(l[i][j])){
+              if(isWall(l[i-1][j+1])){
+                if(isWall(l[i+1][j-1])){
+                  if(!isWall(l[i+1][j])){
+                    if(!isWall(l[i][j+1])){   
+                  l[i][j]="n";
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }       
+          
+    }
+  }
+
 
   
 
   l[7][5]="4";
   l[15][5]="3";
+  l[13][14]="0";
   l[14][14]="b";
   return l;
 }
@@ -266,7 +327,7 @@ addEventListener("keyup", function (event) {
 
 // Called When Page is Loaded
 window.onload = function () {
-  console.log(i["floor"].length);
+  
   // Prepare Level
   // currentLevel = parseLevel(level);
   currentLevel = randomLevel();
