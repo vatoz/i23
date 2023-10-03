@@ -1,0 +1,12 @@
+{
+    "game_warning_0": "Hra je na samotném počátku vývoje, může se měnit víc než by se dalo čekat.",    
+    "topic":{
+        "01":{
+            "topic":"Sen",
+            "title": "Zdál se mi sen.",
+            "intro": "Jak to začalo /n Zdál se mi sen.../n O čem byl? /n Uvidíš. ",
+            "outro": "A tak to bylo.",
+        }
+    }
+    
+}
