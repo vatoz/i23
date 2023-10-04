@@ -11,13 +11,17 @@ const i = {
       "01": document.getElementById("bed01")
     },
     "spider":{
-      "netlu01":document.getElementById("netlu01")
+      "netlu01":document.getElementById("netlu01"),
+      "netru01":document.getElementById("netru01"),
+      "spider":document.getElementById("spider01")
 
     }
 
 
 
 };
+
+let tick=0;
 
 // Object to hold user key presses
 let keysDown = {};
@@ -165,12 +169,12 @@ function draw() {
       if (currentLevel[row][col] === "4") {       
         c.drawImage(i["floor"]["04"] ,col * 32, row * 32);
       }
-      if (currentLevel[row][col] === "b") {       
-        c.drawImage(i["floor"]["01"] ,col * 32, row * 32);
-      }
-
+      
       if (currentLevel[row][col] === "n") {       
         c.drawImage(i["spider"]["netlu01"] ,col * 32, row * 32);
+      }
+      if (currentLevel[row][col] === "r") {       
+        c.drawImage(i["spider"]["netru01"] ,col * 32, row * 32);
       }
 
     }
@@ -185,15 +189,40 @@ function draw() {
     for (let col = 0; col < currentLevel[0].length; col++) {
             
       if (currentLevel[row][col] === "b") {       
-        c.drawImage(i["bed"]["01"] ,col * 32, (row-1) * 32);
+        c.drawImage(i["bed"]["01"] ,col * 32, row * 32);
       }
+
+      if (currentLevel[row][col] === "s") {       
+        let freespace=0;
+        let cycler=row+1;
+        while (cycler<currentLevel.length && currentLevel[cycler][col]=="0"){
+          freespace++;cycler++;        
+        }
+
+        let len_sp=10 + freespace*32;
+        //modulo
+        let offset = tick % (1+ (len_sp*2));
+        if (offset >len_sp) {
+          offset=2*len_sp -offset;
+        }
+
+        
+        c.beginPath();
+        c.moveTo(col * 32  +15 , row * 32  );
+        c.lineTo(col * 32  +15 , row * 32 + offset +10);
+        c.stroke();
+
+        console.log (offset);
+        c.drawImage(i["spider"]["spider"] ,col * 32   , row * 32 + offset -10);
+      }
+
 
     }
   }
 
 
 
-
+  tick++;
 }
 function isWall(a){
   if(a=="1") return true;
@@ -280,8 +309,7 @@ function randomLevel(){
 
   for (let i = 1; i < 15; i++){
     for (let j = 1; j < 15; j++){
-      const random = Math.random();
-      
+           
         if(isWall(l[i-1][j])){
           if(isWall(l[i][j-1])){            
             if(!isWall(l[i][j])){
@@ -290,6 +318,10 @@ function randomLevel(){
                   if(!isWall(l[i+1][j])){
                     if(!isWall(l[i][j+1])){   
                   l[i][j]="n";
+                  const random = Math.random();
+                  if(random>0.4){
+                    l[i][j+1]="s";
+                  }
                     }
                   }
                 }
@@ -297,6 +329,27 @@ function randomLevel(){
             }
           }
         }       
+
+        if(isWall(l[i-1][j])){
+          if(isWall(l[i-1][j-1])){            
+            if(!isWall(l[i][j])){
+              if(isWall(l[i][j+1])){
+                if(isWall(l[i+1][j+1])){
+                  if(!isWall(l[i+1][j])){
+                    if(!isWall(l[i-1][j+1])){   
+                      l[i][j-1]="r";                      
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }       
+
+
+
+
+
           
     }
   }
@@ -308,6 +361,10 @@ function randomLevel(){
   l[15][5]="3";
   l[13][14]="0";
   l[14][14]="b";
+  
+  l[1][4]="0";
+  l[2][4]="0";
+
   return l;
 }
 
