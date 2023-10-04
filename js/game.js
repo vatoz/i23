@@ -201,13 +201,14 @@ function draw() {
 
         let len_sp=10 + freespace*32;
         //modulo
-        let offset = tick % (1+ (len_sp*2));
+        let offset = (tick + 20*col)  % (1+ (len_sp*2));
         if (offset >len_sp) {
           offset=2*len_sp -offset;
         }
 
         
         c.beginPath();
+        c.lineWidth = 1;
         c.moveTo(col * 32  +15 , row * 32  );
         c.lineTo(col * 32  +15 , row * 32 + offset +10);
         c.stroke();
