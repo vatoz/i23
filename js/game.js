@@ -21,6 +21,8 @@ const i = {
 
 };
 
+let viewport_x=0;
+
 let tick=0;
 
 // Object to hold user key presses
@@ -158,23 +160,23 @@ function draw() {
     for (let col = 0; col < currentLevel[0].length; col++) {
       // If character is 1 (a wall) 
       if (currentLevel[row][col] === "1") {       
-        c.drawImage(i["floor"]["01"] ,col * 32, row * 32);
+        c.drawImage(i["floor"]["01"] ,col * 32 - viewport_x, row * 32);
       }
       if (currentLevel[row][col] === "2") {       
-        c.drawImage(i["floor"]["02"] ,col * 32, row * 32);
+        c.drawImage(i["floor"]["02"] ,col * 32 - viewport_x, row * 32);
       }
       if (currentLevel[row][col] === "3") {       
-        c.drawImage(i["floor"]["03"] ,col * 32, row * 32);
+        c.drawImage(i["floor"]["03"] ,col * 32 - viewport_x, row * 32);
       }
       if (currentLevel[row][col] === "4") {       
-        c.drawImage(i["floor"]["04"] ,col * 32, row * 32);
+        c.drawImage(i["floor"]["04"] ,col * 32- viewport_x, row * 32);
       }
       
       if (currentLevel[row][col] === "n") {       
-        c.drawImage(i["spider"]["netlu01"] ,col * 32, row * 32);
+        c.drawImage(i["spider"]["netlu01"] ,col * 32- viewport_x, row * 32);
       }
       if (currentLevel[row][col] === "r") {       
-        c.drawImage(i["spider"]["netru01"] ,col * 32, row * 32);
+        c.drawImage(i["spider"]["netru01"] ,col * 32- viewport_x, row * 32);
       }
 
     }
@@ -182,14 +184,14 @@ function draw() {
 
   c.fillStyle = "red";
   // Draw a rectangle at player's position with size of player's size
-  c.fillRect(player.x, player.y, player.width, player.height);
+  c.fillRect(player.x- viewport_x, player.y, player.width, player.height);
 
   for (let row = 0; row < currentLevel.length; row++) {
     // Loop through each character in line
     for (let col = 0; col < currentLevel[0].length; col++) {
             
       if (currentLevel[row][col] === "b") {       
-        c.drawImage(i["bed"]["01"] ,col * 32, row * 32);
+        c.drawImage(i["bed"]["01"] ,col * 32- viewport_x, row * 32);
       }
 
       if (currentLevel[row][col] === "s") {       
@@ -209,12 +211,12 @@ function draw() {
         
         c.beginPath();
         c.lineWidth = 1;
-        c.moveTo(col * 32  +15 , row * 32  );
-        c.lineTo(col * 32  +15 , row * 32 + offset +10);
+        c.moveTo(col * 32  +15 - viewport_x, row * 32  );
+        c.lineTo(col * 32  +15 - viewport_x, row * 32 + offset +10);
         c.stroke();
 
         console.log (offset);
-        c.drawImage(i["spider"]["spider"] ,col * 32   , row * 32 + offset -10);
+        c.drawImage(i["spider"]["spider"] ,col * 32 - viewport_x  , row * 32 + offset -10);
       }
 
 
@@ -256,7 +258,7 @@ function input() {
   // If D is Down
   if (68 in keysDown) {
     // Check if tile at player location after move is colliding with a wall
-    if (getTile(((player.x + player.width) + player.speed) - 1, player.y + 16) !== "1" && player.x + player.width < canvas.width) {
+    if (getTile(((player.x + player.width) + player.speed) - 1, player.y + 16) !== "1" && player.x + player.width < currentLevel[0].length * 32 ) {
       // Move player right by player speed
       player.x += player.speed;
     }
@@ -267,9 +269,16 @@ function input() {
     // Checks if tile directly above player is a wall
     if (getTile(player.x,player.y - 1) !== "1" && getTile(player.x + 32,player.y - 1) !== "1"){
     // Increase player's y axis kinetic energy by 8 (jump)
-    player.yke += 3;
+    player.yke += 8;
     }
   }
+
+  if(player.x>320){
+    viewport_x=player.x-320;
+  }else{
+    viewport_x=0;
+  }
+
 }
 
 // Gets the tile value at an X and Y value
@@ -281,13 +290,13 @@ function getTile(x, y) {
   }
 }
 
-function randomLevel(){
+function randomLevel(l_height,l_width){
   let l = [];
   const noise = 0.8;
-  for (let i = 0; i < 16; i++){
+  for (let i = 0; i < l_height; i++){
     l.push([]);
-    l[i].push(...("0".repeat(16).split("")));
-    for (let j = 0; j < 16; j++){
+    l[i].push(...("0".repeat(l_width).split("")));
+    for (let j = 0; j < l_width; j++){
       const random = Math.random();
       if (random > noise) {
         l[i][j] = "1";
@@ -298,18 +307,23 @@ function randomLevel(){
     }
   }
 
-  for (let j = 0; j < 16; j++){
-    l[j][0] = "4";   
-    l[j][15] = "4";
-    l[15][j] = "4";
+  for (let i = 0; i < l_height; i++){
+    l[i][0] = "4";   
+    l[i][l_width-1] = "4";    
   }
+  
+  for (let j = 0; j < l_width; j++){
+    l[l_height-1][j] = "4";    
+  }
+
+
   l[0][1] = "4";   
   l[0][2] = "3";   
   l[1][1] = "0";   
 
 
-  for (let i = 1; i < 15; i++){
-    for (let j = 1; j < 15; j++){
+  for (let i = 1; i < l_height-1; i++){
+    for (let j = 1; j < l_width -1; j++){
            
         if(isWall(l[i-1][j])){
           if(isWall(l[i][j-1])){            
@@ -359,9 +373,10 @@ function randomLevel(){
   
 
   l[7][5]="4";
-  l[15][5]="3";
-  l[13][14]="0";
-  l[14][14]="b";
+  l[l_height-1][5]="3";
+  l[l_height-2][l_width-1]="0";
+  l[l_height-3][l_width-1]="0";
+  l[l_height-2][l_width-1]="b";
   
   l[1][4]="0";
   l[2][4]="0";
@@ -388,7 +403,7 @@ window.onload = function () {
   
   // Prepare Level
   // currentLevel = parseLevel(level);
-  currentLevel = randomLevel();
+  currentLevel = randomLevel(16, 100 );
   // Start Platformer
   main();
 }
