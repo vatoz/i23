@@ -374,9 +374,9 @@ function randomLevel(l_height,l_width){
 
   l[7][5]="4";
   l[l_height-1][5]="3";
-  l[l_height-2][l_width-1]="0";
-  l[l_height-3][l_width-1]="0";
-  l[l_height-2][l_width-1]="b";
+  l[l_height-2][l_width-2]="0";
+  l[l_height-3][l_width-2]="0";
+  l[l_height-2][l_width-2]="b";
   
   l[1][4]="0";
   l[2][4]="0";
