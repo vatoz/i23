@@ -18,6 +18,7 @@ const i = {
     },
     "back":{
       "cloud01":document.getElementById("cloud01"),
+      "cloud02":document.getElementById("cloud02")
     }
 
 
@@ -99,9 +100,9 @@ function initClouds(size){
   for(let cldg=0;cldg<cnt;cldg++){
     let cloud = {
       "x": Math.floor( Math.random() * size),
-      "y": Math.floor(Math.random()*512),
-      "speed":Math.random()*1.2,
-      "type":1
+      "y": Math.floor(Math.random()*16*32)-100,
+      "speed":(Math.random()*1.2),
+      "typ":(Math.floor(Math.random()*1.9)+1)
     }
     clouds.unshift(cloud);
   }
@@ -171,18 +172,25 @@ function gravity(obj) {
 }
 
 function draw() {
+  
   // Erase Everything on Canvas
   c.clearRect(0, 0, canvas.width, canvas.height);
   let vWidth=currentLevel[0].length *32;
   for(let cloud_id=0;cloud_id<clouds.length;cloud_id++){
-    
+    var imga=i["back"]["cloud01"];
     let cloud = clouds[cloud_id];
     //todo use type
 
     let pos=(cloud.x + cloud.speed*tick)% vWidth;
-    c.drawImage(i["back"]["cloud01"] ,pos- viewport_x, cloud.y);
-    c.drawImage(i["back"]["cloud01"] ,pos-vWidth- viewport_x, cloud.y);
-    c.drawImage(i["back"]["cloud01"] ,pos+vWidth- viewport_x, cloud.y);
+    
+    if(cloud.typ>1){
+      var imga=i["back"]["cloud02"];
+      console.log(cloud)
+
+    }
+    c.drawImage( imga,pos- viewport_x, cloud.y);
+    c.drawImage(imga ,pos-vWidth- viewport_x, cloud.y);
+    c.drawImage(imga ,pos+vWidth- viewport_x, cloud.y);
 
 
 
@@ -255,7 +263,7 @@ function draw() {
         c.lineTo(col * 32  +15 - viewport_x, row * 32 + offset +10);
         c.stroke();
 
-        console.log (offset);
+        
         c.drawImage(i["spider"]["spider"] ,col * 32 - viewport_x  , row * 32 + offset -10);
       }
 
