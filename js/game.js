@@ -15,6 +15,9 @@ const i = {
       "netru01":document.getElementById("netru01"),
       "spider":document.getElementById("spider01")
 
+    },
+    "back":{
+      "cloud01":document.getElementById("cloud01"),
     }
 
 
@@ -29,6 +32,11 @@ let tick=0;
 let keysDown = {};
 // Will hold Current Level data
 let currentLevel;
+let clouds=[];
+
+
+
+
 
 // The Player Object:
 const player = {
@@ -37,9 +45,9 @@ const player = {
   // Player's Y Position
   y: 0,
   // Width of Player (when drawn)
-  width: 32,
+  width: 16,
   // Height of Player (when drawn)
-  height: 32,
+  height: 16,
   // Gravitational Potential Energy (for use with jumping)
   gpe: 0,
   // Kinetic Energy on the Y axis (for use with jumping)
@@ -85,6 +93,20 @@ floor
 wall
 `;
 
+
+function initClouds(size){
+  let cnt=2+ Math.random()*10;
+  for(let cldg=0;cldg<cnt;cldg++){
+    let cloud = {
+      "x": Math.floor( Math.random() * size),
+      "y": Math.floor(Math.random()*512),
+      "speed":Math.random()*1.2,
+      "type":1
+    }
+    clouds.unshift(cloud);
+  }
+
+}
 
 function randtile(tilefather,x,y){
     const random = Math.random(x+10*y);    
@@ -151,7 +173,25 @@ function gravity(obj) {
 function draw() {
   // Erase Everything on Canvas
   c.clearRect(0, 0, canvas.width, canvas.height);
-  // Set the fill colour to red
+  let vWidth=currentLevel[0].length *32;
+  for(let cloud_id=0;cloud_id<clouds.length;cloud_id++){
+    
+    let cloud = clouds[cloud_id];
+    //todo use type
+
+    let pos=(cloud.x + cloud.speed*tick)% vWidth;
+    c.drawImage(i["back"]["cloud01"] ,pos- viewport_x, cloud.y);
+    c.drawImage(i["back"]["cloud01"] ,pos-vWidth- viewport_x, cloud.y);
+    c.drawImage(i["back"]["cloud01"] ,pos+vWidth- viewport_x, cloud.y);
+
+
+
+  }
+
+
+
+
+
   // Set the fill colour to black
   c.fillStyle = "black";
   // Loop through level lines
@@ -249,7 +289,7 @@ function input() {
   // If A is Down
   if (65 in keysDown) {
     // Check if tile at player location after move is colliding with a wall
-    if (getTile((player.x - player.speed) + 1, player.y + 16) !== "1" && player.x > 1) {
+    if (getTile((player.x - player.speed) + 1, player.y + player.width/2) !== "1" && player.x > 1) {
       // Move player left by player speed
       player.x -= player.speed;
     }
@@ -258,7 +298,7 @@ function input() {
   // If D is Down
   if (68 in keysDown) {
     // Check if tile at player location after move is colliding with a wall
-    if (getTile(((player.x + player.width) + player.speed) - 1, player.y + 16) !== "1" && player.x + player.width < currentLevel[0].length * 32 ) {
+    if (getTile(((player.x + player.width) + player.speed) - 1, player.y + player.width/2) !== "1" && player.x + player.width < currentLevel[0].length * 32 ) {
       // Move player right by player speed
       player.x += player.speed;
     }
@@ -404,6 +444,7 @@ window.onload = function () {
   // Prepare Level
   // currentLevel = parseLevel(level);
   currentLevel = randomLevel(16, 100 );
+  initClouds(100*32);
   // Start Platformer
   main();
 }
