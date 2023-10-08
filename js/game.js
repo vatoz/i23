@@ -34,6 +34,7 @@ let keysDown = {};
 // Will hold Current Level data
 let currentLevel;
 let clouds=[];
+let decorations=[];
 
 
 
@@ -192,10 +193,11 @@ function draw() {
     c.drawImage(imga ,pos-vWidth- viewport_x, cloud.y);
     c.drawImage(imga ,pos+vWidth- viewport_x, cloud.y);
 
-
-
   }
 
+  for(let decor_id=0;decor_id<decorations.length;decor_id++){
+    c.drawImage(decorations[decor_id].decor,  decorations[decor_id].x-viewport_x,decorations[decor_id].y );
+  }
 
 
 
@@ -220,12 +222,6 @@ function draw() {
         c.drawImage(i["floor"]["04"] ,col * 32- viewport_x, row * 32);
       }
       
-      if (currentLevel[row][col] === "n") {       
-        c.drawImage(i["spider"]["netlu01"] ,col * 32- viewport_x, row * 32);
-      }
-      if (currentLevel[row][col] === "r") {       
-        c.drawImage(i["spider"]["netru01"] ,col * 32- viewport_x, row * 32);
-      }
 
     }
   }
@@ -380,9 +376,11 @@ function randomLevel(l_height,l_width){
                 if(isWall(l[i+1][j-1])){
                   if(!isWall(l[i+1][j])){
                     if(!isWall(l[i][j+1])){   
-                  l[i][j]="n";
+                      let decor={x:j*32,y:i*32,decor:document.getElementById("netlu01")};
+                      decorations.unshift(decor);                  
+                      l[i][j]="0";
                   const random = Math.random();
-                  if(random>0.4){
+                  if(random>0.04){
                     l[i][j+1]="s";
                   }
                     }
@@ -400,7 +398,19 @@ function randomLevel(l_height,l_width){
                 if(isWall(l[i+1][j+1])){
                   if(!isWall(l[i+1][j])){
                     if(!isWall(l[i-1][j+1])){   
-                      l[i][j-1]="r";                      
+
+                      let decor={x:(j-1)*32,y:i*32,decor:document.getElementById("netru01")};
+                      decorations.unshift(decor);                  
+                      l[i][j-1]="0";
+                      l[i][j]="0";
+                  const random = Math.random();
+                  if(random>0.44){
+                    l[i][j-1]="s";
+                  }
+
+
+
+                      
                     }
                   }
                 }
@@ -409,6 +419,23 @@ function randomLevel(l_height,l_width){
           }
         }       
 
+
+
+        if(!isWall(l[i][j])){
+          if(isWall(l[i+1][j])){
+            //pozemni dekorace
+            const random = Math.random();
+            if(random>0.96){
+              let decor={x:(j)*32,y:i*32,decor:document.getElementById("flower01")};
+              decorations.unshift(decor);               
+            }else if(random>0.93){
+              let decor={x:(j)*32,y:i*32,decor:document.getElementById("tree01")};
+              decorations.unshift(decor); 
+            }
+
+
+          }
+        }   
 
 
 
