@@ -20,10 +20,20 @@ const i = {
       "cloud01":document.getElementById("cloud01"),
       "cloud02":document.getElementById("cloud02")
     }
+    ,
+  "meteor" :{
+    "crater":document.getElementById("crater"),
+    "meteor":document.getElementById("meteor"),
+    "fire01":document.getElementById("fire01"),
+    "fire02":document.getElementById("fire02"),
+    "fire03":document.getElementById("fire03")
 
 
+  }
 
-};
+
+}
+;
 
 let viewport_x=0;
 
@@ -33,7 +43,9 @@ let tick=0;
 let keysDown = {};
 // Will hold Current Level data
 let currentLevel;
+
 let clouds=[];
+let craters=[];
 let decorations=[];
 
 
@@ -237,6 +249,10 @@ function draw() {
       if (currentLevel[row][col] === "b") {       
         c.drawImage(i["bed"]["01"] ,col * 32- viewport_x, row * 32);
       }
+      if (currentLevel[row][col] === "c") {       
+        c.drawImage(i["meteor"]["crater"] ,col * 32- viewport_x, row * 32);
+      }
+
 
       if (currentLevel[row][col] === "s") {       
         let freespace=0;
@@ -266,6 +282,30 @@ function draw() {
 
     }
   }
+
+  for(let crater_id=0;crater_id<craters.length;crater_id++){
+      var crater=craters[crater_id];          
+        var crater_ticks= tick % ( crater.y/3    +40)   
+        var y= -31+crater_ticks*3;
+
+        if(y<=crater.y){
+          c.drawImage(i["meteor"]["meteor"], crater.x- viewport_x  ,y);
+        }
+        if(y<=crater.y+10){
+          if(crater_ticks*2%3==0 ){
+            c.drawImage(i["meteor"]["fire01"], crater.x- viewport_x  ,y-3);
+          }else if(crater_ticks*2%3==1 ){
+            c.drawImage(i["meteor"]["fire02"], crater.x- viewport_x  ,y-3);
+          }else if(crater_ticks*2 %3==2 ){
+            c.drawImage(i["meteor"]["fire03"], crater.x- viewport_x  ,y-3);
+          }
+          
+        }
+        
+        
+        
+    }
+  
 
 
 
@@ -322,6 +362,12 @@ function input() {
   }else{
     viewport_x=0;
   }
+
+  //todo zvladat nepadat
+  //umrit na pavoukovi
+  //lepeni na vlakne
+  //umreni na meteorit
+  //vitezstvi na posteli
 
 }
 
@@ -419,6 +465,25 @@ function randomLevel(l_height,l_width){
           }
         }       
 
+        for (let j = 1; j < l_width -1; j++){
+          var vyska=0;
+          while( vyska< l_height-2 && l[vyska][j]=="0"){
+            vyska++;
+          }
+          if(vyska==l_height-2){
+            const random = Math.random();
+            if(random>0.0) {// todo zvětšit
+              l[vyska][j]="c";
+              var crate={x:j*32,y:vyska*32}
+              craters.unshift(crate);
+
+            }
+          }
+
+
+
+        }
+
 
 
         if(!isWall(l[i][j])){
@@ -428,7 +493,7 @@ function randomLevel(l_height,l_width){
             if(random>0.96){
               let decor={x:(j)*32,y:i*32,decor:document.getElementById("flower01")};
               decorations.unshift(decor);               
-            }else if(random>0.93){
+            }else if(random>0.95){
               let decor={x:(j)*32,y:i*32,decor:document.getElementById("tree01")};
               decorations.unshift(decor); 
             }
