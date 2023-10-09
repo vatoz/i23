@@ -29,12 +29,30 @@ const i = {
     "fire03":document.getElementById("fire03")
 
 
+  },
+  "ui":{
+    "heal":document.getElementById("heal"),
+    "heart":document.getElementById("heart")
+
   }
 
 
-}
-;
+};
 
+const debug=true;
+function drawDebug(x,y){
+  if(debug){
+  // Define a new Path:
+    c.beginPath();
+    c.fillStyle = "black";
+
+    c.moveTo(x-viewport_x, y-5);
+    c.lineTo(x-viewport_x, y+5);
+    
+    c.moveTo(x-viewport_x-5, y);
+    c.lineTo(x-viewport_x+5, y);
+  }
+}
 let viewport_x=0;
 
 let tick=0;
@@ -67,9 +85,10 @@ const player = {
   // Kinetic Energy on the Y axis (for use with jumping)
   yke: 0,
   // Player's mass (for use with jumping)
-  mass: 64,
-  // Player's Speed (pixels)
-  speed: 3
+  mass: 64,  // Player's Speed (pixels)
+  speed: 3,
+  health:7
+
 }
 
 // Raw Level Data (Each character is a 32px x 32px tile)
@@ -162,7 +181,7 @@ function gravity(obj) {
   obj.gpe = calcGPE(obj);
 
   // If tile at object's head location is a wall
-  if (getTile(obj.x, obj.y) !== "0" || getTile(obj.x + 32, obj.y) !== "0") {
+  if (!isWall(getTile(obj.x, obj.y)) || !isWall(getTile(obj.x + 32, obj.y))) {
     // If object is jumping
     if (obj.yke >= 0){
       // Set Y Kinetic Energy to -0.5
@@ -172,7 +191,7 @@ function gravity(obj) {
     }
   } else {
     // If Tile at object's feet location is a wall
-    if (getTile(obj.x + 32, (obj.y + 32)) !== "0" || getTile(obj.x, (obj.y + 32)) !== "0") {
+    if (!isWall(getTile(obj.x + 32, (obj.y + 32)))  || isWall(getTile(obj.x, (obj.y + 32)))) {
       // If player is falling
       if (obj.yke <= 0){
         // Set Y Kinetic Energy to 0
@@ -198,8 +217,6 @@ function draw() {
     
     if(cloud.typ>1){
       var imga=i["back"]["cloud02"];
-      console.log(cloud)
-
     }
     c.drawImage( imga,pos- viewport_x, cloud.y);
     c.drawImage(imga ,pos-vWidth- viewport_x, cloud.y);
@@ -241,6 +258,7 @@ function draw() {
   c.fillStyle = "red";
   // Draw a rectangle at player's position with size of player's size
   c.fillRect(player.x- viewport_x, player.y, player.width, player.height);
+  drawDebug(player.x,player.y);
 
   for (let row = 0; row < currentLevel.length; row++) {
     // Loop through each character in line
@@ -251,6 +269,9 @@ function draw() {
       }
       if (currentLevel[row][col] === "c") {       
         c.drawImage(i["meteor"]["crater"] ,col * 32- viewport_x, row * 32);
+      }
+      if (currentLevel[row][col] === "heal") {       
+        c.drawImage(i["ui"]["heal"] ,col * 32- viewport_x, row * 32);
       }
 
 
@@ -288,10 +309,10 @@ function draw() {
         var crater_ticks= tick % ( crater.y/3    +40)   
         var y= -31+crater_ticks*3;
 
-        if(y<=crater.y){
+        if(y<crater.y){
           c.drawImage(i["meteor"]["meteor"], crater.x- viewport_x  ,y);
         }
-        if(y<=crater.y+10){
+        if(y<crater.y+10){
           if(crater_ticks*2%3==0 ){
             c.drawImage(i["meteor"]["fire01"], crater.x- viewport_x  ,y-3);
           }else if(crater_ticks*2%3==1 ){
@@ -307,6 +328,10 @@ function draw() {
     }
   
 
+    //ui
+  for(let h=0;h<player.health;h++){
+    c.drawImage(i["ui"]["heart"], h*16 ,0);
+  }
 
 
   tick++;
@@ -361,6 +386,12 @@ function input() {
     viewport_x=player.x-320;
   }else{
     viewport_x=0;
+  }
+
+  var t=getTile(player.x,player.y - 1);
+  if(t=="heal"){
+    player.health++;
+    currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="brokenH";
   }
 
   //todo zvladat nepadat
@@ -496,6 +527,8 @@ function randomLevel(l_height,l_width){
             }else if(random>0.95){
               let decor={x:(j)*32,y:i*32,decor:document.getElementById("tree01")};
               decorations.unshift(decor); 
+            }else if(random>0.094){
+              l[i][j]="heal";
             }
 
 
