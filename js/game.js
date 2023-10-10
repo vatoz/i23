@@ -338,7 +338,7 @@ function draw() {
     c.drawImage(i["ui"]["heart"], h*16 ,0);
   }
   for(let h=0;h<player.gold;h++){
-    c.drawImage(i["ui"]["gold"],512- h*16 ,0);
+    c.drawImage(i["ui"]["gold"],512-32- (h*16) ,0);
   }
 
 
