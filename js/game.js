@@ -32,7 +32,8 @@ const i = {
   },
   "ui":{
     "heal":document.getElementById("heal"),
-    "heart":document.getElementById("heart")
+    "heart":document.getElementById("heart"),
+    "gold":document.getElementById("gold"),
 
   }
 
@@ -87,7 +88,8 @@ const player = {
   // Player's mass (for use with jumping)
   mass: 64,  // Player's Speed (pixels)
   speed: 3,
-  health:7
+  health:7,
+  gold:1
 
 }
 
@@ -273,6 +275,9 @@ function draw() {
       if (currentLevel[row][col] === "heal") {       
         c.drawImage(i["ui"]["heal"] ,col * 32- viewport_x, row * 32);
       }
+      if (currentLevel[row][col] === "gold") {       
+        c.drawImage(i["ui"]["gold"] ,col * 32- viewport_x, row * 32);
+      }
 
 
       if (currentLevel[row][col] === "s") {       
@@ -331,6 +336,9 @@ function draw() {
     //ui
   for(let h=0;h<player.health;h++){
     c.drawImage(i["ui"]["heart"], h*16 ,0);
+  }
+  for(let h=0;h<player.gold;h++){
+    c.drawImage(i["ui"]["gold"],512- h*16 ,0);
   }
 
 
@@ -391,7 +399,11 @@ function input() {
   var t=getTile(player.x,player.y - 1);
   if(t=="heal"){
     player.health++;
-    currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="brokenH";
+    currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="0";
+  }
+  if(t=="gold"){
+    player.gold++;
+    currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="0";
   }
 
   //todo zvladat nepadat
@@ -527,8 +539,10 @@ function randomLevel(l_height,l_width){
             }else if(random>0.95){
               let decor={x:(j)*32,y:i*32,decor:document.getElementById("tree01")};
               decorations.unshift(decor); 
-            }else if(random>0.094){
+            }else if(random>0.93){
               l[i][j]="heal";
+            }else if(random>0.91){
+              l[i][j]="gold";
             }
 
 
