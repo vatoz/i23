@@ -142,6 +142,10 @@ function gravity(obj) {
   obj.y -= obj.yke;
   // Minus object's Y Kinetic Energy by object's Gravitational Potential Energy
   obj.yke -= obj.gpe;
+  if (obj.yke<-6){
+    console.log("too fast");
+    obj.yke=-6;
+  }
   // Recalculate Gravitational Potential Energy
   obj.gpe = calcGPE(obj);
 
@@ -152,7 +156,7 @@ function gravity(obj) {
       // Set Y Kinetic Energy to -0.5
     obj.yke = -0.5;
     // Add 1 to Object Y (To Avoid Collision Error)
-    obj.y += 1;
+    obj.y += 1; //todo asi musím zaokrouhlit
     }
   } else {
     // If Tile at object's feet location is a wall
