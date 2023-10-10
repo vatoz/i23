@@ -42,7 +42,7 @@ const i = {
 
 const debug=true;
 function drawDebug(x,y){
-  if(debug){
+  
   // Define a new Path:
     c.beginPath();
     c.fillStyle = "black";
@@ -52,7 +52,7 @@ function drawDebug(x,y){
     
     c.moveTo(x-viewport_x-5, y);
     c.lineTo(x-viewport_x+5, y);
-  }
+  
 }
 let viewport_x=0;
 
@@ -93,42 +93,6 @@ const player = {
 
 }
 
-// Raw Level Data (Each character is a 32px x 32px tile)
-const level = `0000000000000000
-0000000000000000
-0010000000000000
-0000000000001111
-0000111000000000
-0000000000011111
-0000000000000000
-0000000000111111
-0000000000011000
-1110000000000000
-0000000010000110
-0001111111100000
-0000000000000000
-0000000000000000
-0000000001111110
-0000000000000000`;
-
-const startlevel = `wall
-floor
-floor
-floor
-bed
-floor
-air
-f+
-f+
-floor
-floor
-endbed
-floor
-floor
-wall
-`;
-
-
 function initClouds(size){
   let cnt=2+ Math.random()*10;
   for(let cldg=0;cldg<cnt;cldg++){
@@ -158,7 +122,6 @@ function randtile(tilefather,x,y){
     
     return tilefather[addr];
 
-
 }
 
 
@@ -183,7 +146,7 @@ function gravity(obj) {
   obj.gpe = calcGPE(obj);
 
   // If tile at object's head location is a wall
-  if (!isWall(getTile(obj.x, obj.y)) || !isWall(getTile(obj.x + 32, obj.y))) {
+  if (isWall(getTile(obj.x, obj.y)) || isWall(getTile(obj.x+obj.width , obj.y))) {
     // If object is jumping
     if (obj.yke >= 0){
       // Set Y Kinetic Energy to -0.5
@@ -193,13 +156,13 @@ function gravity(obj) {
     }
   } else {
     // If Tile at object's feet location is a wall
-    if (!isWall(getTile(obj.x + 32, (obj.y + 32)))  || isWall(getTile(obj.x, (obj.y + 32)))) {
+    if (isWall(getTile(obj.x + obj.width, (obj.y + obj.height)))  || isWall(getTile(obj.x, (obj.y + obj.height)))) {
       // If player is falling
       if (obj.yke <= 0){
         // Set Y Kinetic Energy to 0
         obj.yke = 0;
         // Minus object's Y value so it sits directly on the floor 
-        obj.y -= (obj.y % 32);
+        obj.y -= (obj.y % 32)-obj.height;
       }
     }
   }
@@ -345,6 +308,7 @@ function draw() {
   tick++;
 }
 function isWall(a){
+  if(a=="0") return false;
   if(a=="1") return true;
   if(a=="2") return true;
   if(a=="3") return true;
@@ -366,7 +330,7 @@ function input() {
   // If A is Down
   if (65 in keysDown) {
     // Check if tile at player location after move is colliding with a wall
-    if (getTile((player.x - player.speed) + 1, player.y + player.width/2) !== "1" && player.x > 1) {
+    if (!isWall(getTile((player.x - player.speed) + 1, player.y + player.width/2))  && player.x > 1) {
       // Move player left by player speed
       player.x -= player.speed;
     }
@@ -375,7 +339,7 @@ function input() {
   // If D is Down
   if (68 in keysDown) {
     // Check if tile at player location after move is colliding with a wall
-    if (getTile(((player.x + player.width) + player.speed) - 1, player.y + player.width/2) !== "1" && player.x + player.width < currentLevel[0].length * 32 ) {
+    if (!isWall(getTile(((player.x + player.width) + player.speed) - 1, player.y + player.width/2)) && player.x + player.width < currentLevel[0].length * 32 ) {
       // Move player right by player speed
       player.x += player.speed;
     }
@@ -384,7 +348,7 @@ function input() {
   // If W is Down and Player's kinetic energy (in Y Axis) is 0
   if (87 in keysDown && player.yke === 0) {
     // Checks if tile directly above player is a wall
-    if (getTile(player.x,player.y - 1) !== "1" && getTile(player.x + 32,player.y - 1) !== "1"){
+    if (!isWall(getTile(player.x,player.y - 1) ) && getTile(player.x + 32,player.y - 1) !== "1"){
     // Increase player's y axis kinetic energy by 8 (jump)
     player.yke += 8;
     }
@@ -394,6 +358,9 @@ function input() {
     viewport_x=player.x-320;
   }else{
     viewport_x=0;
+  }
+  if(viewport_x>currentLevel[0].length * 32  - 320){
+    viewport_x=currentLevel[0].length * 32  - 320;
   }
 
   var t=getTile(player.x,player.y - 1);
