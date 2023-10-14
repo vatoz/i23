@@ -190,6 +190,10 @@ function draw() {
       if (currentLevel[row][col] === "water") {       
         animate_water(col , row,150);
       }      
+      if (currentLevel[row][col] === "water_frog") {       //to samé, ale už bylo vylepšeno
+        animate_water(col , row,150);
+      }      
+
 
     }
   }
@@ -319,15 +323,24 @@ function animate_water(col,row, delay){
       var base_t=local_ticks-80 - len_wa/2;
       if (base_t<20){ //
         sprite_draw("splash_"+ Math.floor(base_t/4) ,col*32,(row +freespace)*32);
+      }else if(base_t==21)  {
+        if(currentLevel[row][col]=="water"){
+        if (Math.random() >0.97) {
+          //zatím pokaždé
+          const choices=["frog_0","frog_1","frog_2","flower"];
+          let i=Math.floor(Math.random()*choices.length); 
+          let decor={x:(col)*32,y:(row+freespace)*32,decor:choices[i]};
+          decorations.unshift(decor);
+          currentLevel[row][col]="water_frog";
+          }
+          }
+        }
+        sprite_draw("drop_0" ,col*32,row*32);
       } 
 
-      sprite_draw("drop_0" ,col*32,row*32);
+      
 
     }
-
-}
-
-
 
 
 function parseLevel(lvl) {
@@ -536,7 +549,7 @@ function randomLevel(l_height,l_width){
           for (let i = 1; i<5; i++){
             if(isWall(l[i][j])){
               var kontrol=i+1;
-              console.log(kontrol);
+              
               while( !isWall(l[kontrol][j]) && l[kontrol][j]=="0" && kontrol<l_height-2  ){                
                 kontrol++;
               }
