@@ -1,48 +1,10 @@
 // Get Canvas Element For Use With Javascript (assign to any variable name you want; but short names are generally better as you will be typing it alot).
 const c = document.getElementById("canvas").getContext("2d");
-const i = {
-    "floor":{
-        "01": document.getElementById("floor01"),
-        "02": document.getElementById("floor02"),
-        "03": document.getElementById("floor03"),
-        "04": document.getElementById("floor04")
-    },
-    "bed":{
-      "01": document.getElementById("bed01")
-    },
-    "spider":{
-      "netlu01":document.getElementById("netlu01"),
-      "netru01":document.getElementById("netru01"),
-      "spider":document.getElementById("spider01")
-
-    },
-    "back":{
-      "cloud01":document.getElementById("cloud01"),
-      "cloud02":document.getElementById("cloud02")
-    }
-    ,
-  "meteor" :{
-    "crater":document.getElementById("crater"),
-    "meteor":document.getElementById("meteor"),
-    "fire01":document.getElementById("fire01"),
-    "fire02":document.getElementById("fire02"),
-    "fire03":document.getElementById("fire03")
-
-
-  },
-  "ui":{
-    "heal":document.getElementById("heal"),
-    "heart":document.getElementById("heart"),
-    "gold":document.getElementById("gold"),
-
-  }
-
-
-};
+let img = new Image();
+img.src= "sprites0.png";
 
 const debug=true;
-function drawDebug(x,y){
-  
+function drawDebug(x,y){ 
   // Define a new Path:
     c.beginPath();
     c.fillStyle = "black";
@@ -65,6 +27,7 @@ let currentLevel;
 
 let clouds=[];
 let craters=[];
+let droplets=[];
 let decorations=[];
 
 
@@ -100,7 +63,7 @@ function initClouds(size){
       "x": Math.floor( Math.random() * size),
       "y": Math.floor(Math.random()*16*32)-100,
       "speed":(Math.random()*1.2),
-      "typ":(Math.floor(Math.random()*1.9)+1)
+      "typ":(Math.floor(Math.random()*1.9))
     }
     clouds.unshift(cloud);
   }
@@ -172,29 +135,34 @@ function gravity(obj) {
   }
 }
 
+
+function sprite_draw(spritename,x,y){
+  if(sprites[spritename]){
+    c.drawImage(img,sprites[spritename].x,sprites[spritename].y,sprites[spritename].w,sprites[spritename].h,x,y,sprites[spritename].w,sprites[spritename].h    );
+  }else{
+    console.log ("Missing sprite:" + spritename);
+  }    
+}
+
 function draw() {
   
   // Erase Everything on Canvas
   c.clearRect(0, 0, canvas.width, canvas.height);
   let vWidth=currentLevel[0].length *32;
   for(let cloud_id=0;cloud_id<clouds.length;cloud_id++){
-    var imga=i["back"]["cloud01"];
+    
     let cloud = clouds[cloud_id];
-    //todo use type
-
+    var imga="cloud_"+cloud.typ;
     let pos=(cloud.x + cloud.speed*tick)% vWidth;
     
-    if(cloud.typ>1){
-      var imga=i["back"]["cloud02"];
-    }
-    c.drawImage( imga,pos- viewport_x, cloud.y);
-    c.drawImage(imga ,pos-vWidth- viewport_x, cloud.y);
-    c.drawImage(imga ,pos+vWidth- viewport_x, cloud.y);
+    sprite_draw( imga,pos- viewport_x, cloud.y);
+    sprite_draw(imga ,pos-vWidth- viewport_x, cloud.y);
+    sprite_draw(imga ,pos+vWidth- viewport_x, cloud.y);
 
   }
 
   for(let decor_id=0;decor_id<decorations.length;decor_id++){
-    c.drawImage(decorations[decor_id].decor,  decorations[decor_id].x-viewport_x,decorations[decor_id].y );
+    sprite_draw(decorations[decor_id].decor,  decorations[decor_id].x-viewport_x,decorations[decor_id].y );
   }
 
 
@@ -208,19 +176,17 @@ function draw() {
     for (let col = 0; col < currentLevel[0].length; col++) {
       // If character is 1 (a wall) 
       if (currentLevel[row][col] === "1") {       
-        c.drawImage(i["floor"]["01"] ,col * 32 - viewport_x, row * 32);
+        sprite_draw("floor_0" ,col * 32 - viewport_x, row * 32);
       }
       if (currentLevel[row][col] === "2") {       
-        c.drawImage(i["floor"]["02"] ,col * 32 - viewport_x, row * 32);
+        sprite_draw("floor_1" ,col * 32 - viewport_x, row * 32);
       }
       if (currentLevel[row][col] === "3") {       
-        c.drawImage(i["floor"]["03"] ,col * 32 - viewport_x, row * 32);
+        sprite_draw("floor_2" ,col * 32 - viewport_x, row * 32);
       }
       if (currentLevel[row][col] === "4") {       
-        c.drawImage(i["floor"]["04"] ,col * 32- viewport_x, row * 32);
-      }
-      
-
+        sprite_draw("floor_3" ,col * 32 - viewport_x, row * 32);
+      }      
     }
   }
 
@@ -234,16 +200,16 @@ function draw() {
     for (let col = 0; col < currentLevel[0].length; col++) {
             
       if (currentLevel[row][col] === "b") {       
-        c.drawImage(i["bed"]["01"] ,col * 32- viewport_x, row * 32);
+        sprite_draw("bed" ,col * 32- viewport_x, row * 32);
       }
       if (currentLevel[row][col] === "c") {       
-        c.drawImage(i["meteor"]["crater"] ,col * 32- viewport_x, row * 32);
+        sprite_draw("crater" ,col * 32- viewport_x, row * 32);
       }
       if (currentLevel[row][col] === "heal") {       
-        c.drawImage(i["ui"]["heal"] ,col * 32- viewport_x, row * 32);
+        sprite_draw("heal" ,col * 32- viewport_x, row * 32);
       }
       if (currentLevel[row][col] === "gold") {       
-        c.drawImage(i["ui"]["gold"] ,col * 32- viewport_x, row * 32);
+        sprite_draw("gold" ,col * 32- viewport_x, row * 32);
       }
 
 
@@ -268,8 +234,7 @@ function draw() {
         c.lineTo(col * 32  +15 - viewport_x, row * 32 + offset +10);
         c.stroke();
 
-        
-        c.drawImage(i["spider"]["spider"] ,col * 32 - viewport_x  , row * 32 + offset -10);
+        sprite_draw("spider" ,col * 32 - viewport_x  , row * 32 + offset -10);
       }
 
 
@@ -282,15 +247,18 @@ function draw() {
         var y= -31+crater_ticks*3;
 
         if(y<crater.y){
-          c.drawImage(i["meteor"]["meteor"], crater.x- viewport_x  ,y);
+          sprite_draw("meteor", crater.x- viewport_x  ,y);
         }
         if(y<crater.y+10){
-          if(crater_ticks*2%3==0 ){
-            c.drawImage(i["meteor"]["fire01"], crater.x- viewport_x  ,y-3);
-          }else if(crater_ticks*2%3==1 ){
-            c.drawImage(i["meteor"]["fire02"], crater.x- viewport_x  ,y-3);
-          }else if(crater_ticks*2 %3==2 ){
-            c.drawImage(i["meteor"]["fire03"], crater.x- viewport_x  ,y-3);
+          if(tick%3==0 ){
+            sprite_draw("meteor_fire_0", crater.x- viewport_x  ,y-3);
+          }else if(tick%3==1 ){
+            sprite_draw("meteor_fire_1", crater.x- viewport_x  ,y-3);
+          }else if(tick%3==2 ){
+            sprite_draw("meteor_fire_2", crater.x- viewport_x  ,y-3);
+          }else{
+            sprite_draw("meteor_fire_0", crater.x- viewport_x  ,y-3);
+
           }
           
         }
@@ -302,10 +270,10 @@ function draw() {
 
     //ui
   for(let h=0;h<player.health;h++){
-    c.drawImage(i["ui"]["heart"], h*16 ,0);
+    sprite_draw("heart", h*16 ,0);
   }
   for(let h=0;h<player.gold;h++){
-    c.drawImage(i["ui"]["gold"],512-32- (h*16) ,0);
+    sprite_draw("gold",512-32- (h*16) ,0);
   }
 
 
@@ -436,7 +404,7 @@ function randomLevel(l_height,l_width){
                 if(isWall(l[i+1][j-1])){
                   if(!isWall(l[i+1][j])){
                     if(!isWall(l[i][j+1])){   
-                      let decor={x:j*32,y:i*32,decor:document.getElementById("netlu01")};
+                      let decor={x:j*32,y:i*32,decor:"net_left_01"};
                       decorations.unshift(decor);                  
                       l[i][j]="0";
                   const random = Math.random();
@@ -459,7 +427,7 @@ function randomLevel(l_height,l_width){
                   if(!isWall(l[i+1][j])){
                     if(!isWall(l[i-1][j+1])){   
 
-                      let decor={x:(j-1)*32,y:i*32,decor:document.getElementById("netru01")};
+                      let decor={x:(j-1)*32,y:i*32,decor:"net_right_01"};
                       decorations.unshift(decor);                  
                       l[i][j-1]="0";
                       l[i][j]="0";
@@ -486,7 +454,7 @@ function randomLevel(l_height,l_width){
           }
           if(vyska==l_height-2){
             const random = Math.random();
-            if(random>0.0) {// todo zvětšit
+            if(random>.4 + (0.02*craters.length) ) {// todo zvětšit
               l[vyska][j]="c";
               var crate={x:j*32,y:vyska*32}
               craters.unshift(crate);
@@ -505,10 +473,10 @@ function randomLevel(l_height,l_width){
             //pozemni dekorace
             const random = Math.random();
             if(random>0.96){
-              let decor={x:(j)*32,y:i*32,decor:document.getElementById("flower01")};
+              let decor={x:(j)*32,y:i*32,decor:"flower"};
               decorations.unshift(decor);               
             }else if(random>0.95){
-              let decor={x:(j)*32,y:i*32,decor:document.getElementById("tree01")};
+              let decor={x:(j)*32,y:i*32,decor:"tree"};
               decorations.unshift(decor); 
             }else if(random>0.93){
               l[i][j]="heal";

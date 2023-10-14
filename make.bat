@@ -1,0 +1,1 @@
+spright -t js.inja -o sprites.js
