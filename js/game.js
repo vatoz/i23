@@ -187,6 +187,10 @@ function draw() {
       if (currentLevel[row][col] === "4") {       
         sprite_draw("floor_3" ,col * 32 - viewport_x, row * 32);
       }      
+      if (currentLevel[row][col] === "water") {       
+        animate_water(col , row,150);
+      }      
+
     }
   }
 
@@ -287,6 +291,44 @@ function isWall(a){
   if(a=="4") return true;
   return false;
 }
+
+function animate_water(col,row, delay){
+      
+
+      let freespace=0;
+      let cycler=row+1;
+      while (cycler<currentLevel.length && currentLevel[cycler][col]=="0"){
+        freespace++;cycler++;        
+      }
+
+      let len_wa=24 + freespace*32;
+
+      var local_ticks=((tick)+ 2*delay) %( delay+80+freespace*32/2);
+      
+    //drop 8
+    if (local_ticks<80){
+      sprite_draw("drop_"+ Math.floor(local_ticks/10) ,col*32,row*32);
+    }else if (local_ticks < (80) + len_wa/2 ){
+      //freefall
+      var spr=2;
+      if (local_ticks <95) spr=1;
+      if (local_ticks <88) spr=0;
+      sprite_draw("drop_f_"+ spr ,col*32,(row*32)+ ((local_ticks-80)*2  ));
+      sprite_draw("drop_0" ,col*32,row*32);
+    }else{
+      var base_t=local_ticks-80 - len_wa/2;
+      if (base_t<20){ //
+        sprite_draw("splash_"+ Math.floor(base_t/4) ,col*32,(row +freespace)*32);
+      } 
+
+      sprite_draw("drop_0" ,col*32,row*32);
+
+    }
+
+}
+
+
+
 
 function parseLevel(lvl) {
   // Split level data into lines
@@ -466,8 +508,7 @@ function randomLevel(l_height,l_width){
 
         }
 
-
-
+        
         if(!isWall(l[i][j])){
           if(isWall(l[i+1][j])){
             //pozemni dekorace
@@ -478,25 +519,37 @@ function randomLevel(l_height,l_width){
             }else if(random>0.95){
               let decor={x:(j)*32,y:i*32,decor:"tree"};
               decorations.unshift(decor); 
-            }else if(random>0.93){
+            }else if(random>0.94){
               l[i][j]="heal";
-            }else if(random>0.91){
+            }else if(random>0.93){
               l[i][j]="gold";
             }
 
 
           }
         }   
-
-
-
-
-          
+      }
     }
-  }
 
 
-  
+        for (let j = 3; j < l_width -3; j++){
+          for (let i = 1; i<5; i++){
+            if(isWall(l[i][j])){
+              var kontrol=i+1;
+              console.log(kontrol);
+              while( !isWall(l[kontrol][j]) && l[kontrol][j]=="0" && kontrol<l_height-2  ){                
+                kontrol++;
+              }
+              if(isWall(l[kontrol][j])&&kontrol>i+3){
+                l[i+1][j]="water";
+              }
+
+
+            }
+          }
+        }
+
+    
 
   l[7][5]="4";
   l[l_height-1][5]="3";
@@ -526,7 +579,6 @@ addEventListener("keyup", function (event) {
 
 // Called When Page is Loaded
 window.onload = function () {
-  
   // Prepare Level
   // currentLevel = parseLevel(level);
   currentLevel = randomLevel(16, 100 );
