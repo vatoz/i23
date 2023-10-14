@@ -3,11 +3,12 @@ Inktober2023 made game
 
 
 License undisclosed
+Building instructions:
+    spright - create sprites
 
-Topics included: none
 
-
-release adress none
+release adress:
+* https://vatoz.itch.io/i23
 
 Materials:
 * https://replit.com/talk/learn/Basic-Platformer-With-Javascript-and-HTML/7509
