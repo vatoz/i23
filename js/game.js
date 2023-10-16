@@ -63,7 +63,7 @@ function initClouds(size){
       "x": Math.floor( Math.random() * size),
       "y": Math.floor(Math.random()*16*32)-100,
       "speed":(Math.random()*1.2),
-      "typ":(Math.floor(Math.random()*1.9))
+      "typ":(Math.floor(Math.random()*3.99))
     }
     clouds.unshift(cloud);
   }
@@ -207,10 +207,10 @@ function draw() {
     // Loop through each character in line
     for (let col = 0; col < currentLevel[0].length; col++) {
             
-      if (currentLevel[row][col] === "b") {       
+      if (currentLevel[row][col] === "bed") {       
         sprite_draw("bed" ,col * 32- viewport_x, row * 32);
       }
-      if (currentLevel[row][col] === "c") {       
+      if (currentLevel[row][col] === "crater") {       
         sprite_draw("crater" ,col * 32- viewport_x, row * 32);
       }
       if (currentLevel[row][col] === "heal") {       
@@ -219,9 +219,32 @@ function draw() {
       if (currentLevel[row][col] === "gold") {       
         sprite_draw("gold" ,col * 32- viewport_x, row * 32);
       }
+      if (currentLevel[row][col] === "bouncer1") {       
+        sprite_draw("bouncer_1" ,col * 32- viewport_x, row * 32);
+        player.yke=10;
+        currentLevel[row][col] = "bouncer0";
+      }
+
+      if (currentLevel[row][col] === "bouncer0") {       
+        sprite_draw("bouncer_0" ,col * 32- viewport_x, row * 32);
+        if(Math.floor(player.x/32)==col){
+          if(Math.floor(player.y/32)==row){            
+            if(player.yke<0){          
+              console.log(player.y % 32);
+              if(player.y % 32 >  10 ){                
+                currentLevel[row][col] = "bouncer1";
+                sprite_draw("bouncer_1" ,col * 32- viewport_x, row * 32);
+              }
+            }
+          }
+        }
+
+      }
+      
 
 
-      if (currentLevel[row][col] === "s") {       
+
+      if (currentLevel[row][col] === "spider") {       
         let freespace=0;
         let cycler=row+1;
         while (cycler<currentLevel.length && currentLevel[cycler][col]=="0"){
@@ -311,18 +334,18 @@ function animate_water(col,row, delay){
       
     //drop 8
     if (local_ticks<80){
-      sprite_draw("drop_"+ Math.floor(local_ticks/10) ,col*32,row*32);
+      sprite_draw("drop_"+ Math.floor(local_ticks/10) ,col*32-viewport_x,row*32);
     }else if (local_ticks < (80) + len_wa/2 ){
       //freefall
       var spr=2;
       if (local_ticks <95) spr=1;
       if (local_ticks <88) spr=0;
-      sprite_draw("drop_f_"+ spr ,col*32,(row*32)+ ((local_ticks-80)*2  ));
-      sprite_draw("drop_0" ,col*32,row*32);
+      sprite_draw("drop_f_"+ spr ,col*32-viewport_x,(row*32)+ ((local_ticks-80)*2  ));
+      sprite_draw("drop_0" ,col*32-viewport_x,row*32);
     }else{
       var base_t=local_ticks-80 - len_wa/2;
       if (base_t<20){ //
-        sprite_draw("splash_"+ Math.floor(base_t/4) ,col*32,(row +freespace)*32);
+        sprite_draw("splash_"+ Math.floor(base_t/4) ,col*32-viewport_x,(row +freespace)*32);
       }else if(base_t==21)  {
         if(currentLevel[row][col]=="water"){
         if (Math.random() >0.97) {
@@ -335,7 +358,7 @@ function animate_water(col,row, delay){
           }
           }
         }
-        sprite_draw("drop_0" ,col*32,row*32);
+        sprite_draw("drop_0" ,col*32-viewport_x,row*32);
       } 
 
       
@@ -464,7 +487,7 @@ function randomLevel(l_height,l_width){
                       l[i][j]="0";
                   const random = Math.random();
                   if(random>0.04){
-                    l[i][j+1]="s";
+                    l[i][j+1]="spider";
                   }
                     }
                   }
@@ -488,7 +511,7 @@ function randomLevel(l_height,l_width){
                       l[i][j]="0";
                   const random = Math.random();
                   if(random>0.44){
-                    l[i][j-1]="s";
+                    l[i][j-1]="spider";
                   }
 
 
@@ -510,7 +533,7 @@ function randomLevel(l_height,l_width){
           if(vyska==l_height-2){
             const random = Math.random();
             if(random>.4 + (0.02*craters.length) ) {// todo zvětšit
-              l[vyska][j]="c";
+              l[vyska][j]="crater";
               var crate={x:j*32,y:vyska*32}
               craters.unshift(crate);
 
@@ -522,7 +545,7 @@ function randomLevel(l_height,l_width){
         }
 
         
-        if(!isWall(l[i][j])){
+        if(l[i][j]=="0"){
           if(isWall(l[i+1][j])){
             //pozemni dekorace
             const random = Math.random();
@@ -536,8 +559,17 @@ function randomLevel(l_height,l_width){
               l[i][j]="heal";
             }else if(random>0.93){
               l[i][j]="gold";
-            }
+            }else if(random>0.80){ 
+            
+            if(i>5){
+              if(l[i-1][j]=="0"){
+                if(l[i-2][j]=="0"){
+                  l[i][j]="bouncer0";
+                }
+              }
 
+            }
+          }
 
           }
         }   
