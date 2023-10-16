@@ -57,7 +57,7 @@ const player = {
 }
 
 function initClouds(size){
-  let cnt=2+ Math.random()*10;
+  let cnt=20+ Math.random()*10;
   for(let cldg=0;cldg<cnt;cldg++){
     let cloud = {
       "x": Math.floor( Math.random() * size),
@@ -165,8 +165,8 @@ function draw() {
   }
 
   sprite_draw("grass_2",- (viewport_x -256)/(vWidth-512 )*(630-512),512-32-120);
-  sprite_draw("grass_1",- (viewport_x -256)/(vWidth-512 )*(800-512),512-3*32);
-  sprite_draw("grass_0",- (viewport_x -256)/(vWidth-512 )*(1024-512),512-2*32);
+  sprite_draw("grass_1",- (viewport_x -256)/(vWidth-512 )*(800-512),512-32-80);
+  sprite_draw("grass_0",- (viewport_x -256)/(vWidth-512 )*(1024-512),512-32-32);
   
 
 
