@@ -149,6 +149,10 @@ function draw() {
   // Erase Everything on Canvas
   c.clearRect(0, 0, canvas.width, canvas.height);
   let vWidth=currentLevel[0].length *32;
+  
+
+  sprite_draw("grass_3",- (viewport_x -256)/(vWidth-512 )*(580-512),512-32-156);
+
   for(let cloud_id=0;cloud_id<clouds.length;cloud_id++){
     
     let cloud = clouds[cloud_id];
@@ -158,8 +162,15 @@ function draw() {
     sprite_draw( imga,pos- viewport_x, cloud.y);
     sprite_draw(imga ,pos-vWidth- viewport_x, cloud.y);
     sprite_draw(imga ,pos+vWidth- viewport_x, cloud.y);
-
   }
+
+  sprite_draw("grass_2",- (viewport_x -256)/(vWidth-512 )*(630-512),512-32-120);
+  sprite_draw("grass_1",- (viewport_x -256)/(vWidth-512 )*(800-512),512-3*32);
+  sprite_draw("grass_0",- (viewport_x -256)/(vWidth-512 )*(1024-512),512-2*32);
+  
+
+
+
 
   for(let decor_id=0;decor_id<decorations.length;decor_id++){
     sprite_draw(decorations[decor_id].decor,  decorations[decor_id].x-viewport_x,decorations[decor_id].y );
@@ -402,15 +413,15 @@ function input() {
     // Increase player's y axis kinetic energy by 8 (jump)
     player.yke += 8;
     }
-  }
+    }
 
-  if(player.x>320){
-    viewport_x=player.x-320;
+  if(player.x>256){
+    viewport_x=player.x-256;
   }else{
     viewport_x=0;
   }
-  if(viewport_x>currentLevel[0].length * 32  - 320){
-    viewport_x=currentLevel[0].length * 32  - 320;
+  if(viewport_x>currentLevel[0].length * 32  - 512){
+    viewport_x=currentLevel[0].length * 32  - 512;
   }
 
   var t=getTile(player.x,player.y - 1);
