@@ -62,7 +62,7 @@ function initClouds(size){
     let cloud = {
       "x": Math.floor( Math.random() * size),
       "y": Math.floor(Math.random()*16*32)-100,
-      "speed":(Math.random()*1.2),
+      "speed":(Math.random()*1.7  ),
       "typ":(Math.floor(Math.random()*3.99))
     }
     clouds.unshift(cloud);
@@ -144,6 +144,24 @@ function sprite_draw(spritename,x,y){
   }    
 }
 
+function draw_clouds(level){
+  var lbound=Math.floor((level-1)/4  * clouds.length);
+  var rbound=(level)/4  * clouds.length;
+
+  for(let cloud_id=lbound;cloud_id<rbound;cloud_id++){
+    
+    let cloud = clouds[cloud_id];
+    var imga="cloud_"+cloud.typ;
+    let pos=(cloud.x  + cloud.speed*tick)     %  (currentLevel[0].length *32)     ;
+  //sprite_draw("grass_3",- (viewport_x -256)/(vWidth-512 )*(580-512),512-32-156);  
+    sprite_draw(imga,pos- viewport_x, cloud.y);
+    sprite_draw(imga ,pos-(currentLevel[0].length *32)- viewport_x, cloud.y);
+    sprite_draw(imga ,pos+(currentLevel[0].length *32)- viewport_x, cloud.y);
+  }
+
+
+}
+
 function draw() {
   
   // Erase Everything on Canvas
@@ -151,21 +169,13 @@ function draw() {
   let vWidth=currentLevel[0].length *32;
   
 
+  draw_clouds(4);
   sprite_draw("grass_3",- (viewport_x -256)/(vWidth-512 )*(580-512),512-32-156);
-
-  for(let cloud_id=0;cloud_id<clouds.length;cloud_id++){
-    
-    let cloud = clouds[cloud_id];
-    var imga="cloud_"+cloud.typ;
-    let pos=(cloud.x + cloud.speed*tick)% vWidth;
-    
-    sprite_draw( imga,pos- viewport_x, cloud.y);
-    sprite_draw(imga ,pos-vWidth- viewport_x, cloud.y);
-    sprite_draw(imga ,pos+vWidth- viewport_x, cloud.y);
-  }
-
+  draw_clouds(3);
   sprite_draw("grass_2",- (viewport_x -256)/(vWidth-512 )*(630-512),512-32-120);
+  draw_clouds(2);
   sprite_draw("grass_1",- (viewport_x -256)/(vWidth-512 )*(800-512),512-32-80);
+  draw_clouds(1);
   sprite_draw("grass_0",- (viewport_x -256)/(vWidth-512 )*(1024-512),512-32-32);
   
 
