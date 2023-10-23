@@ -240,6 +240,9 @@ function draw() {
       if (currentLevel[row][col] === "gold") {       
         sprite_draw("gold" ,col * 32- viewport_x, row * 32);
       }
+      if (currentLevel[row][col] === "safe") {       
+        sprite_draw("safe" ,col * 32- viewport_x, row * 32);
+      }
       if (currentLevel[row][col] === "bouncer1") {       
         sprite_draw("bouncer_1" ,col * 32- viewport_x, row * 32);
         player.yke=10;
@@ -324,9 +327,16 @@ function draw() {
   for(let h=0;h<player.health;h++){
     sprite_draw("heart", h*16 ,0);
   }
-  for(let h=0;h<player.gold;h++){
+
+  for(let h=0;h<player.gold %5;h++){
     sprite_draw("gold",512-32- (h*16) ,0);
   }
+  if(player.gold>5){
+    for(let h=0;h<((player.gold - (player.gold %5))/5);h++){
+      sprite_draw("money",512-32- ((h+(player.gold %5))*16) ,0);
+   }
+  }
+
 
 
   tick++;
@@ -443,6 +453,11 @@ function input() {
     player.gold++;
     currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="0";
   }
+  if(t=="safe"){
+    player.gold+=15;
+    currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="0";
+  }
+
 
   //todo zvladat nepadat
   //umrit na pavoukovi
@@ -462,6 +477,7 @@ function getTile(x, y) {
 }
 
 function randomLevel(l_height,l_width){
+  let safe=false;
   let l = [];
   const noise = 0.8;
   for (let i = 0; i < l_height; i++){
@@ -590,6 +606,10 @@ function randomLevel(l_height,l_width){
               }
 
             }
+          }else if ( random > 0.78 && !safe){
+            let safe=true;
+            l[i][j]="safe";
+
           }
 
           }
