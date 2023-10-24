@@ -52,7 +52,8 @@ const player = {
   mass: 64,  // Player's Speed (pixels)
   speed: 3,
   health:7,
-  gold:1
+  gold:1, 
+  direction:0
 
 }
 
@@ -218,11 +219,18 @@ function draw() {
 
     }
   }
+var p_sprite="human";
+  if(player.direction >0){
+      p_sprite="human_r_"+ Math.floor(player.direction  % 2 );
+  }else if(player.direction <0){
+     p_sprite="human_l_"+  Math.floor((-player.direction)  % 2 );;
+  }else{
+     p_sprite="human";
+  }
+  sprite_draw(p_sprite ,player.x-16- viewport_x,player.y-32+player.height);
 
-  c.fillStyle = "red";
-  // Draw a rectangle at player's position with size of player's size
-  c.fillRect(player.x- viewport_x, player.y, player.width, player.height);
-  drawDebug(player.x,player.y);
+
+
 
   for (let row = 0; row < currentLevel.length; row++) {
     // Loop through each character in line
@@ -414,8 +422,9 @@ function input() {
     if (!isWall(getTile((player.x - player.speed) + 1, player.y + player.width/2))  && player.x > 1) {
       // Move player left by player speed
       player.x -= player.speed;
+      if(player.direction<0){player.direction--;}else{player.direction=-1;}
     }
-  }
+  }else if(player.direction<0){player.direction=0;}
 
   // If D is Down
   if (68 in keysDown) {
@@ -423,8 +432,10 @@ function input() {
     if (!isWall(getTile(((player.x + player.width) + player.speed) - 1, player.y + player.width/2)) && player.x + player.width < currentLevel[0].length * 32 ) {
       // Move player right by player speed
       player.x += player.speed;
+      if(player.direction>0){player.direction++;}else{player.direction=1;}
+      
     }
-  }
+  }else if(player.direction>0){player.direction=0;} 
 
   // If W is Down and Player's kinetic energy (in Y Axis) is 0
   if (87 in keysDown && player.yke === 0) {
@@ -473,6 +484,9 @@ function getTile(x, y) {
   if (x < currentLevel.length * 32 && x > 0 && y < currentLevel[0].length * 32 && y > 0) {
     // Returns Value
     return currentLevel[Math.floor(y / 32)][Math.floor(x / 32)];
+  }else {
+    return "0";
+
   }
 }
 
