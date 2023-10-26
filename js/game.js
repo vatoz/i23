@@ -245,10 +245,10 @@ var p_sprite="human";
   }
   sprite_draw(p_sprite ,player.x-16- viewport_x,player.y-32+(player.height/2));
   
-  drawDebug(player.x-player.widthHalf,player.y+player.heightHalf);
-  drawDebug(player.x+player.widthHalf,player.y-player.heightHalf);
-  drawDebug(player.x-player.widthHalf,player.y-player.heightHalf);
-  drawDebug(player.x+player.widthHalf,player.y+player.heightHalf);
+  //drawDebug(player.x-player.widthHalf,player.y+player.heightHalf);
+  //drawDebug(player.x+player.widthHalf,player.y-player.heightHalf);
+  //drawDebug(player.x-player.widthHalf,player.y-player.heightHalf);
+  //drawDebug(player.x+player.widthHalf,player.y+player.heightHalf);
 
 
   for (let row = 0; row < currentLevel.length; row++) {
