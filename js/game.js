@@ -31,7 +31,7 @@ let clouds=[];
 let craters=[];
 let droplets=[];
 let decorations=[];
-
+let chilli =false;
 
 
 
@@ -144,7 +144,7 @@ function gravity(obj) {
         obj.yke = 0;
         // Minus object's Y value so it sits directly on the floor 
         obj.y -= (obj.y % 32)-obj.height;
-        
+        obj.y= Math.floor(obj.y);
       }
     }
   }
@@ -261,6 +261,9 @@ var p_sprite="human";
       if (currentLevel[row][col] === "crater") {       
         sprite_draw("crater" ,col * 32- viewport_x, row * 32);
       }
+      if (currentLevel[row][col] === "chilli") {       
+        sprite_draw("chilli" ,col * 32- viewport_x, row * 32);
+      }
       if (currentLevel[row][col] === "heal") {       
         sprite_draw("heal" ,col * 32- viewport_x, row * 32);
       }
@@ -353,6 +356,10 @@ var p_sprite="human";
   for(let h=0;h<player.health;h++){
     sprite_draw("heart", h*16 ,0);
   }
+  if(chilli){
+    sprite_draw("chilli", 16+player.health*16,0);
+  }
+
 
   for(let h=0;h<player.gold %5;h++){
     sprite_draw("gold",512-32- (h*16) ,0);
@@ -461,7 +468,12 @@ function input() {
     // Checks if tile directly above player is a wall
     if (!isWall(getTile(player.x,player.y - 1) ) && getTile(player.x + 32,player.y - 1) !== "1"){
     // Increase player's y axis kinetic energy by 8 (jump)
-    player.yke += 8;
+     player.yke += 8;
+     if(chilli){
+      if(getTile(player.x,player.y - 1)=="0"){
+        currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="chilli";
+      }
+     }
     }
     }
 
@@ -494,6 +506,10 @@ function input() {
     player.gold+=15;
     currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="0";
   }
+  if(t=="chilli"){
+    chilli=true;
+  }
+
 
 
   //todo zvladat nepadat
@@ -550,6 +566,8 @@ function randomLevel(l_height,l_width){
   l[0][1] = "4";   
   l[0][2] = "3";   
   l[1][1] = "0";   
+
+  l[4][4] = "chilli";   
 
 
   for (let i = 1; i < l_height-1; i++){
