@@ -3,7 +3,7 @@ const c = document.getElementById("canvas").getContext("2d");
 let img = new Image();
 img.src= "sprites0.png";
 
-const debug=true;
+const debug=false;
 function drawDebug(x,y){ 
   // Define a new Path:
     c.beginPath();
@@ -11,9 +11,11 @@ function drawDebug(x,y){
 
     c.moveTo(x-viewport_x, y-5);
     c.lineTo(x-viewport_x, y+5);
+    c.stroke();
     
     c.moveTo(x-viewport_x-5, y);
     c.lineTo(x-viewport_x+5, y);
+    c.stroke();
   
 }
 let viewport_x=0;
@@ -41,16 +43,18 @@ const player = {
   // Player's Y Position
   y: 0,
   // Width of Player (when drawn)
-  width: 16,
+  widthHalf: 7,
+  width: 14,
   // Height of Player (when drawn)
-  height: 16,
+  heightHalf:11,
+  height: 22,
   // Gravitational Potential Energy (for use with jumping)
   gpe: 0,
   // Kinetic Energy on the Y axis (for use with jumping)
   yke: 0,
   // Player's mass (for use with jumping)
   mass: 64,  // Player's Speed (pixels)
-  speed: 3,
+  speed: 1,
   health:7,
   gold:1, 
   direction:0
@@ -102,38 +106,50 @@ function main() {
 
 // Takes object as parameter for future extensibility
 function gravity(obj) {
-  // Minus object Y value by object Y Kinetic Energy
-  obj.y -= obj.yke;
+  if(obj.yke>30){obj.yke=30;}
+  if(obj.yke<-30){obj.yke=-30;}
+  
+  if (obj.yke>0){ //skok
+    // Minus object Y value by object Y Kinetic Energy
+    obj.y -= obj.yke;
+  }else if (!isWall(getTile(obj.x - obj.widthHalf, (obj.y + obj.heightHalf)))  && !isWall(getTile(obj.x +obj.widthHalf, (obj.y + obj.heightHalf)))) {
+    //mohu padat
+    obj.y -= obj.yke;
+  }
+
   // Minus object's Y Kinetic Energy by object's Gravitational Potential Energy
   obj.yke -= obj.gpe;
   if (obj.yke<-6){
-    console.log("too fast");
     obj.yke=-6;
   }
   // Recalculate Gravitational Potential Energy
   obj.gpe = calcGPE(obj);
-
+  //console.log(obj.gpe);
   // If tile at object's head location is a wall
-  if (isWall(getTile(obj.x, obj.y)) || isWall(getTile(obj.x+obj.width , obj.y))) {
+  if (isWall(getTile(obj.x-obj.widthHalf, obj.y-obj.heightHalf)) || isWall(getTile(obj.x+obj.widthHalf, obj.y-obj.heightHalf))) {
     // If object is jumping
-    if (obj.yke >= 0){
+    if (obj.yke > 0){
+
       // Set Y Kinetic Energy to -0.5
-    obj.yke = -0.5;
+    obj.yke = -0.1;
     // Add 1 to Object Y (To Avoid Collision Error)
     obj.y += 1; //todo asi musím zaokrouhlit
     }
   } else {
     // If Tile at object's feet location is a wall
-    if (isWall(getTile(obj.x + obj.width, (obj.y + obj.height)))  || isWall(getTile(obj.x, (obj.y + obj.height)))) {
+    if (isWall(getTile(obj.x - obj.widthHalf, (obj.y + obj.heightHalf)))  || isWall(getTile(obj.x +obj.widthHalf, (obj.y + obj.heightHalf)))) {
       // If player is falling
-      if (obj.yke <= 0){
+      if (obj.yke < 0){
         // Set Y Kinetic Energy to 0
         obj.yke = 0;
         // Minus object's Y value so it sits directly on the floor 
         obj.y -= (obj.y % 32)-obj.height;
+        
       }
     }
   }
+
+
 }
 
 
@@ -227,9 +243,12 @@ var p_sprite="human";
   }else{
      p_sprite="human";
   }
-  sprite_draw(p_sprite ,player.x-16- viewport_x,player.y-32+player.height);
-
-
+  sprite_draw(p_sprite ,player.x-16- viewport_x,player.y-32+(player.height/2));
+  
+  drawDebug(player.x-player.widthHalf,player.y+player.heightHalf);
+  drawDebug(player.x+player.widthHalf,player.y-player.heightHalf);
+  drawDebug(player.x-player.widthHalf,player.y-player.heightHalf);
+  drawDebug(player.x+player.widthHalf,player.y+player.heightHalf);
 
 
   for (let row = 0; row < currentLevel.length; row++) {
@@ -253,17 +272,16 @@ var p_sprite="human";
       }
       if (currentLevel[row][col] === "bouncer1") {       
         sprite_draw("bouncer_1" ,col * 32- viewport_x, row * 32);
-        player.yke=10;
+        player.yke=10 + 2*Math.random();
         currentLevel[row][col] = "bouncer0";
       }
 
       if (currentLevel[row][col] === "bouncer0") {       
         sprite_draw("bouncer_0" ,col * 32- viewport_x, row * 32);
         if(Math.floor(player.x/32)==col){
-          if(Math.floor(player.y/32)==row){            
-            if(player.yke<0){          
-              console.log(player.y % 32);
-              if(player.y % 32 >  10 ){                
+          if(Math.floor((player.y+player.heightHalf)/32)==row){            
+            if(player.yke<0){                        
+              if((player.y+player.heightHalf) % 32 >  16 ){                
                 currentLevel[row][col] = "bouncer1";
                 sprite_draw("bouncer_1" ,col * 32- viewport_x, row * 32);
               }
@@ -348,6 +366,7 @@ var p_sprite="human";
 
 
   tick++;
+
 }
 function isWall(a){
   if(a=="0") return false;
@@ -360,7 +379,6 @@ function isWall(a){
 
 function animate_water(col,row, delay){
       
-
       let freespace=0;
       let cycler=row+1;
       while (cycler<currentLevel.length && currentLevel[cycler][col]=="0"){
@@ -400,9 +418,7 @@ function animate_water(col,row, delay){
         sprite_draw("drop_0" ,col*32-viewport_x,row*32);
       } 
 
-      
-
-    }
+}
 
 
 function parseLevel(lvl) {
@@ -419,7 +435,7 @@ function input() {
   // If A is Down
   if (65 in keysDown) {
     // Check if tile at player location after move is colliding with a wall
-    if (!isWall(getTile((player.x - player.speed) + 1, player.y + player.width/2))  && player.x > 1) {
+    if (!isWall(getTile((player.x - player.speed - player.widthHalf) + 1, player.y + player.heightHalf-2))  && player.x > 1&& !isWall(getTile((player.x - player.speed -player.widthHalf) + 1, player.y - player.heightHalf ))){
       // Move player left by player speed
       player.x -= player.speed;
       if(player.direction<0){player.direction--;}else{player.direction=-1;}
@@ -429,7 +445,10 @@ function input() {
   // If D is Down
   if (68 in keysDown) {
     // Check if tile at player location after move is colliding with a wall
-    if (!isWall(getTile(((player.x + player.width) + player.speed) - 1, player.y + player.width/2)) && player.x + player.width < currentLevel[0].length * 32 ) {
+    if (!isWall(getTile(((player.x + player.widthHalf) + player.speed) - 1, player.y + player.heightHalf-2)) &&
+     player.x + player.width < currentLevel[0].length * 32  &&
+    !isWall(getTile(((player.x + player.widthHalf) + player.speed) - 1, player.y - player.heightHalf))
+    ) {
       // Move player right by player speed
       player.x += player.speed;
       if(player.direction>0){player.direction++;}else{player.direction=1;}
@@ -454,6 +473,13 @@ function input() {
   if(viewport_x>currentLevel[0].length * 32  - 512){
     viewport_x=currentLevel[0].length * 32  - 512;
   }
+
+  if(player.y>512){
+    player.health--;
+    player.y-=128;
+
+  }
+
 
   var t=getTile(player.x,player.y - 1);
   if(t=="heal"){
@@ -480,13 +506,16 @@ function input() {
 
 // Gets the tile value at an X and Y value
 function getTile(x, y) {
-  // Checks if X or Y value is out of bounds
-  if (x < currentLevel.length * 32 && x > 0 && y < currentLevel[0].length * 32 && y > 0) {
+  var nx= Math.floor(x/32);
+  var ny= Math.floor(y/32);
+    // Checks if X or Y value is out of bounds
+  if (ny < currentLevel.length  && nx >= 0 && nx < currentLevel[0].length  && ny > 0) {
     // Returns Value
-    return currentLevel[Math.floor(y / 32)][Math.floor(x / 32)];
+    //console.log(nx+" " + ny);
+    return currentLevel[ny][nx];
   }else {
     return "0";
-
+    console.log("obo");
   }
 }
 
