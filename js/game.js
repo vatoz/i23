@@ -3,6 +3,14 @@ const c = document.getElementById("canvas").getContext("2d");
 let img = new Image();
 img.src= "sprites0.png";
 
+const zone_1_end =80;
+
+function col_to_zone( col){
+  if(col<=zone_1_end ) return 1;
+  return 2;
+
+
+}
 
 function drawDebug(x,y){ 
    return false;
@@ -102,7 +110,11 @@ function main() {
     gravity(player);
   } else{
     player.y-=2;
-    if (player.y<-64) player.baloon=false;
+    if (player.y<-50) {
+      player.baloon=false;
+      player.x+=32;
+      player.y=-player.height;
+    }
   }
   
   // Draw Stuff
@@ -226,34 +238,32 @@ function draw() {
 
   // Set the fill colour to black
   c.fillStyle = "black";
+const basic_tiles = [ "floor_0", "floor_1",   "floor_2","floor_3", "castle_floor_0", "castle_floor_1" ,"grave","cimburi" ,
+"castle_wall_0","castle_wall_1","castle_wall_2","castle_wall_3","castle_wall_4","castle_wall_5",
+"castle_decoration_0","castle_decoration_1", "castle_decoration_2",
+"castle_err_0","castle_err_1","castle_err_2","castle_err_3","castle_err_4","castle_err_5",
+"castle_upper_0","castle_upper_1"
+
+
+];
   // Loop through level lines
   for (let row = 0; row < currentLevel.length; row++) {
     // Loop through each character in line
     for (let col = 0; col < currentLevel[0].length; col++) {
       // If character is 1 (a wall) 
-      if (currentLevel[row][col] === "1") {       
-        sprite_draw("floor_0" ,col * 32 - viewport_x, row * 32);
+      for(let ind=0; ind<basic_tiles.length;ind++){
+        if(currentLevel[row][col] === basic_tiles[ind]){
+          sprite_draw(basic_tiles[ind] ,col * 32 - viewport_x, row * 32);
+
+        }
       }
-      if (currentLevel[row][col] === "2") {       
-        sprite_draw("floor_1" ,col * 32 - viewport_x, row * 32);
-      }
-      if (currentLevel[row][col] === "3") {       
-        sprite_draw("floor_2" ,col * 32 - viewport_x, row * 32);
-      }
-      if (currentLevel[row][col] === "4") {       
-        sprite_draw("floor_3" ,col * 32 - viewport_x, row * 32);
-      } 
-      if (currentLevel[row][col] === "grave") {       
-        sprite_draw("grave" ,col * 32 - viewport_x, row * 32);
-      }      
+
       if (currentLevel[row][col] === "water") {       
         animate_water(col , row,150);
       }      
       if (currentLevel[row][col] === "water_frog") {       //to samé, ale už bylo vylepšeno
         animate_water(col , row,150);
       }      
-
-
     }
   }
 
@@ -268,6 +278,7 @@ function draw() {
     }
     sprite_draw(p_sprite ,player.x-16- viewport_x,player.y-32+(player.height/2));
   }
+
   if(player.baloon){
     sprite_draw("baloon_0" ,player.x - viewport_x -32, player.y -64+player.heightHalf); //nestandartni velikost
   }
@@ -278,29 +289,16 @@ function draw() {
   //drawDebug(player.x-player.widthHalf,player.y-player.heightHalf);
   //drawDebug(player.x+player.widthHalf,player.y+player.heightHalf);
 
-
+  const front_tiles = [ "bed","crater","chilli","heal","gold","safe" ];
   for (let row = 0; row < currentLevel.length; row++) {
     // Loop through each character in line
     for (let col = 0; col < currentLevel[0].length; col++) {
-            
-      if (currentLevel[row][col] === "bed") {       
-        sprite_draw("bed" ,col * 32- viewport_x, row * 32);
+      for(let ind=0; ind<front_tiles.length;ind++){
+        if(currentLevel[row][col] === front_tiles[ind]){
+          sprite_draw(front_tiles[ind] ,col * 32 - viewport_x, row * 32);
+        }
       }
-      if (currentLevel[row][col] === "crater") {       
-        sprite_draw("crater" ,col * 32- viewport_x, row * 32);
-      }
-      if (currentLevel[row][col] === "chilli") {       
-        sprite_draw("chilli" ,col * 32- viewport_x, row * 32);
-      }
-      if (currentLevel[row][col] === "heal") {       
-        sprite_draw("heal" ,col * 32- viewport_x, row * 32);
-      }
-      if (currentLevel[row][col] === "gold") {       
-        sprite_draw("gold" ,col * 32- viewport_x, row * 32);
-      }
-      if (currentLevel[row][col] === "safe") {       
-        sprite_draw("safe" ,col * 32- viewport_x, row * 32);
-      }
+
       if (currentLevel[row][col] === "bouncer1") {       
         sprite_draw("bouncer_1" ,col * 32- viewport_x, row * 32);
         player.yke=10 + 2*Math.random();
@@ -328,12 +326,7 @@ function draw() {
           player.baloon=true;
         }
       }
-
-
       
-
-
-
       if (currentLevel[row][col] === "spider") {       
         let freespace=0;
         let cycler=row+1;
@@ -360,14 +353,12 @@ function draw() {
 
         sprite_draw("spider" ,col * 32 - viewport_x  , row * 32 + offset -10);
       }
-
-
     }
   }
 
   for(let crater_id=0;crater_id<craters.length;crater_id++){
       var crater=craters[crater_id];          
-        var crater_ticks= tick % ( crater.y/3    +40)   
+        var crater_ticks= tick % ( crater.x*2    +40)   
         var y= -31+crater_ticks*3;
 
         if(y<crater.y){
@@ -391,8 +382,6 @@ function draw() {
           
         }
         
-        
-        
     }
 
   
@@ -405,7 +394,6 @@ function draw() {
   if(chilli){
     sprite_draw("chilli", 16+player.health*16,0);
   }
-
 
   for(let h=0;h<player.gold %5;h++){
     sprite_draw("gold",512-32- (h*16) ,0);
@@ -444,11 +432,13 @@ function player_kill(li){
 
 function isWall(a){
   if(a=="0") return false;
-  if(a=="1") return true;
-  if(a=="2") return true;
-  if(a=="3") return true;
-  if(a=="4") return true;
+  if(a=="floor_0") return true;
+  if(a=="floor_1") return true;
+  if(a=="floor_2") return true;
+  if(a=="floor_3") return true;
   if(a=="grave") return true;
+  if(a=="castle_floor_0") return true;
+  if(a=="castle_floor_1") return true;
   return false;
 }
 
@@ -615,7 +605,6 @@ function getTile(x, y) {
     return currentLevel[ny][nx];
   }else {
     return "0";
-    console.log("obo");
   }
 }
 
@@ -626,24 +615,87 @@ function randomLevel(l_height,l_width){
   for (let i = 0; i < l_height; i++){
     l.push([]);
     l[i].push(...("0".repeat(l_width).split("")));
-    for (let j = 0; j < l_width; j++){
-      const random = Math.random();
+  }
+
+  for (let i = 0; i < l_height; i++){
+      for (let j = 0; j < zone_1_end; j++){
+      const random=  Math.random();
+      const tile = Math.floor((Math.random()*4.999));
       if (random > noise) {
-        l[i][j] = "1";
-      }
-      if (random > noise+0.15) {
-        l[i][j] = "2";
+        l[i][j] = "floor_"+tile;
       }
     }
   }
 
+  l[( l_height-2)][(zone_1_end )]="baloon";
+
+
+  
+  l[0][zone_1_end+1] = "cimburi";    
+  
+  var last_hrad=0;
+  var cur_hrad=0;
+  for (let j =  zone_1_end+2;j<l_width; j++){
+    const random=  Math.random();
+    cur_hrad=last_hrad;
+    if(random>0.9){
+              cur_hrad=Math.floor(Math.random()*l_height);
+    }else if (cur_hrad<l_height-3 && random > 0.7){
+      cur_hrad+=3;
+    }else if( cur_hrad>3 && random > 0.5){
+      cur_hrad--; 
+    }
+
+    if(cur_hrad<3){
+      const random=  Math.random();
+      if(random>0.2){
+        l[cur_hrad][j] = "cimburi";    
+      }
+    }
+
+    for(let i= cur_hrad+1;i<l_height -1;i++){
+      var tile="castle_wall_"+Math.floor(Math.random()*6);
+      
+      if(i==cur_hrad+1){
+        if (Math.random()>0.01 ){
+          var tile="castle_upper_"+Math.floor(Math.random()*6);
+        }
+      }
+        if(i%3 ==1){
+          if (Math.random()>0.8 ){
+          var tile="castle_decoration_"+Math.floor(Math.random()*3);
+          }
+        }
+        if(i%3 ==2){
+          if (Math.random()>0.45 ){
+          var tile="castle_floor_"+Math.floor(Math.random()*2);
+          }
+        }
+        if (Math.random()>0.88 ){
+          var tile="castle_err_"+Math.floor(Math.random()*6);
+        }
+      
+      l[i][j]=tile;
+    }
+    last_hrad=cur_hrad;
+  }
+
+  
+  for (let i = 1; i < l_height; i++){
+    l[i][zone_1_end+1] = "castle_floor_1";    
+  }
+
   for (let i = 0; i < l_height; i++){
-    l[i][0] = "4";   
-    l[i][l_width-1] = "4";    
+    l[i][0] = "floor_3";   
+    l[i][l_width-1] = "castle_floor_1";    
   }
   
-  for (let j = 0; j < l_width; j++){
-    l[l_height-1][j] = "4";    
+  for (let j = 0; j <= zone_1_end; j++){
+    l[l_height-1][j] = "floor_3";    
+  }
+
+  for (let j = zone_1_end+1; j <= l_width; j++){
+    l[l_height-1][j] = "castle_floor_1";    
   }
 
 
@@ -790,12 +842,12 @@ function randomLevel(l_height,l_width){
 
     
 
-  l[7][5]="4";
-  l[l_height-1][5]="3";
+  l[7][5]="floor_2";
+  l[l_height-1][5]="floor_3";
   l[l_height-2][l_width-2]="0";
   l[l_height-3][l_width-2]="0";
-  l[l_height-2][l_width-2]="b";
-  
+  l[l_height-2][l_width-2]="0";
+  l[l_height-2][l_width-2]="bed";
   l[1][4]="0";
   l[2][4]="0";
 
