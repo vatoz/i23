@@ -3,24 +3,25 @@ const c = document.getElementById("canvas").getContext("2d");
 let img = new Image();
 img.src= "sprites0.png";
 
-const debug=false;
+
 function drawDebug(x,y){ 
+//  return false;
   // Define a new Path:
     c.beginPath();
     c.fillStyle = "black";
 
-    c.moveTo(x-viewport_x, y-5);
-    c.lineTo(x-viewport_x, y+5);
+    c.moveTo(x-viewport_x, y-25);
+    c.lineTo(x-viewport_x, y+25);
     c.stroke();
     
-    c.moveTo(x-viewport_x-5, y);
-    c.lineTo(x-viewport_x+5, y);
+    c.moveTo(x-viewport_x-25, y);
+    c.lineTo(x-viewport_x+25, y);
     c.stroke();
   
 }
 let viewport_x=0;
-
 let tick=0;
+let killtick=0;
 
 // Object to hold user key presses
 let keysDown = {};
@@ -57,8 +58,8 @@ const player = {
   speed: 1,
   health:7,
   gold:1, 
-  direction:0
-
+  direction:0, 
+  baloon:false
 }
 
 function initClouds(size){
@@ -97,7 +98,13 @@ function main() {
   // Check for Input
   input();
   // Do gravity of player
-  gravity(player);
+  if(!player.baloon){
+    gravity(player);
+  } else{
+    player.y-=2;
+    if (player.y<-64) player.baloon=false;
+  }
+  
   // Draw Stuff
   draw();
   // Allow HTML to render stuff + loop main function
@@ -145,6 +152,7 @@ function gravity(obj) {
         // Minus object's Y value so it sits directly on the floor 
         obj.y -= (obj.y % 32)-obj.height;
         obj.y= Math.floor(obj.y);
+        
       }
     }
   }
@@ -154,8 +162,10 @@ function gravity(obj) {
 
 
 function sprite_draw(spritename,x,y){
+  let nx=Math.floor(x);
+  let ny=Math.floor(y);
   if(sprites[spritename]){
-    c.drawImage(img,sprites[spritename].x,sprites[spritename].y,sprites[spritename].w,sprites[spritename].h,x,y,sprites[spritename].w,sprites[spritename].h    );
+    c.drawImage(img,sprites[spritename].x,sprites[spritename].y,sprites[spritename].w,sprites[spritename].h,nx,ny,sprites[spritename].w,sprites[spritename].h    );
   }else{
     console.log ("Missing sprite:" + spritename);
   }    
@@ -184,7 +194,18 @@ function draw() {
   // Erase Everything on Canvas
   c.clearRect(0, 0, canvas.width, canvas.height);
   let vWidth=currentLevel[0].length *32;
-  
+  //.sky-gradient-14 { background: linear-gradient(to bottom, #2d91c2 0%,#1e528e 100%); }
+  //#9be2fe 0%,#67d1fb 100%
+  // Create gradient
+
+  const grd = c.createLinearGradient(0, 0, 0, 512);
+  grd.addColorStop(0, "#9be2fe");
+  grd.addColorStop(1, "#67d1fb");
+
+  // Fill with gradient
+  c.fillStyle = grd;
+  c.fillRect(0, 0, 512, 512);
+
 
   draw_clouds(4);
   sprite_draw("grass_3",- (viewport_x -256)/(vWidth-512 )*(580-512),512-32-156);
@@ -195,9 +216,6 @@ function draw() {
   draw_clouds(1);
   sprite_draw("grass_0",- (viewport_x -256)/(vWidth-512 )*(1024-512),512-32-32);
   
-
-
-
 
   for(let decor_id=0;decor_id<decorations.length;decor_id++){
     sprite_draw(decorations[decor_id].decor,  decorations[decor_id].x-viewport_x,decorations[decor_id].y );
@@ -224,6 +242,9 @@ function draw() {
       }
       if (currentLevel[row][col] === "4") {       
         sprite_draw("floor_3" ,col * 32 - viewport_x, row * 32);
+      } 
+      if (currentLevel[row][col] === "grave") {       
+        sprite_draw("grave" ,col * 32 - viewport_x, row * 32);
       }      
       if (currentLevel[row][col] === "water") {       
         animate_water(col , row,150);
@@ -235,15 +256,22 @@ function draw() {
 
     }
   }
-var p_sprite="human";
-  if(player.direction >0){
-      p_sprite="human_r_"+ Math.floor(player.direction  % 2 );
-  }else if(player.direction <0){
-     p_sprite="human_l_"+  Math.floor((-player.direction)  % 2 );;
-  }else{
-     p_sprite="human";
+
+  if(!player.baloon){
+    var p_sprite="human";
+    if(player.direction >0){
+        p_sprite="human_r_"+ Math.floor(player.direction  % 2 );
+    }else if(player.direction <0){
+      p_sprite="human_l_"+  Math.floor((-player.direction)  % 2 );;
+    }else{
+      p_sprite="human";
+    }
+    sprite_draw(p_sprite ,player.x-16- viewport_x,player.y-32+(player.height/2));
   }
-  sprite_draw(p_sprite ,player.x-16- viewport_x,player.y-32+(player.height/2));
+  if(player.baloon){
+    sprite_draw("baloon_0" ,player.x - viewport_x -32, player.y -64+player.heightHalf); //nestandartni velikost
+  }
+
   
   //drawDebug(player.x-player.widthHalf,player.y+player.heightHalf);
   //drawDebug(player.x+player.widthHalf,player.y-player.heightHalf);
@@ -291,8 +319,17 @@ var p_sprite="human";
             }
           }
         }
-
       }
+
+      if (currentLevel[row][col] === "baloon"){      
+        sprite_draw("baloon_0" ,(col * 32- viewport_x)-16, row * 32  - 32); //nestandartni velikost
+        if(touch_player(col * 32  +15 , row * 32 + 15 , 3)){
+          currentLevel[row][col]="0";
+          player.baloon=true;
+        }
+      }
+
+
       
 
 
@@ -317,6 +354,9 @@ var p_sprite="human";
         c.moveTo(col * 32  +15 - viewport_x, row * 32  );
         c.lineTo(col * 32  +15 - viewport_x, row * 32 + offset +10);
         c.stroke();
+        if(touch_player(col * 32  +15 , row * 32 + offset +10, 10)){
+          player_kill(1);
+        }
 
         sprite_draw("spider" ,col * 32 - viewport_x  , row * 32 + offset -10);
       }
@@ -333,6 +373,10 @@ var p_sprite="human";
         if(y<crater.y){
           sprite_draw("meteor", crater.x- viewport_x  ,y);
         }
+        if(touch_player(crater.x+16 ,y+16,10)){
+          player_kill(1);
+        }
+
         if(y<crater.y+10){
           if(tick%3==0 ){
             sprite_draw("meteor_fire_0", crater.x- viewport_x  ,y-3);
@@ -350,6 +394,8 @@ var p_sprite="human";
         
         
     }
+
+  
   
 
     //ui
@@ -373,14 +419,36 @@ var p_sprite="human";
 
 
   tick++;
-
 }
+
+
+
+function player_kill(li){
+  if(tick-killtick<100) return false;
+
+  player.health -=li;
+  if(player.health<=0){
+      //todo GAME over
+      if(0<player.y<512&& 0<player.x<currentLevel[0].length*32 ){
+        currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="grave";
+      }
+      player.health=7;
+      player.x=256;
+      player.y=0;
+      chilli=false;
+  }else{
+    killtick=tick;
+    
+  }
+}
+
 function isWall(a){
   if(a=="0") return false;
   if(a=="1") return true;
   if(a=="2") return true;
   if(a=="3") return true;
   if(a=="4") return true;
+  if(a=="grave") return true;
   return false;
 }
 
@@ -439,6 +507,8 @@ function parseLevel(lvl) {
 
 // 87 -> W, 65 -> A, 83 -> S, 68 -> D
 function input() {
+  if(player.baloon) return true;
+
   // If A is Down
   if (65 in keysDown) {
     // Check if tile at player location after move is colliding with a wall
@@ -466,7 +536,7 @@ function input() {
   // If W is Down and Player's kinetic energy (in Y Axis) is 0
   if (87 in keysDown && player.yke === 0) {
     // Checks if tile directly above player is a wall
-    if (!isWall(getTile(player.x,player.y - 1) ) && getTile(player.x + 32,player.y - 1) !== "1"){
+    if (!isWall(getTile(player.x-player.widthHalf,player.y -player.heightHalf) ) && !isWall(getTile(player.x -player.widthHalf ,player.y - player.heightHalf))){
     // Increase player's y axis kinetic energy by 8 (jump)
      player.yke += 8;
      if(chilli){
@@ -507,18 +577,32 @@ function input() {
     currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="0";
   }
   if(t=="chilli"){
-    chilli=true;
+    if(!chilli){
+      chilli=true;
+      player_kill(1);
+    }    
   }
 
 
 
   //todo zvladat nepadat
-  //umrit na pavoukovi
   //lepeni na vlakne
-  //umreni na meteorit
   //vitezstvi na posteli
+}
+
+function touch_player(x,y,size){
+  drawDebug(x,y);
+  let px=Math.abs (player.x-x);
+  if(px>size+player.heightHalf) return false;
+  let py=Math.abs (player.y-y);
+  if(py>size+player.widthHalf) return false;
+  
+
+  let distance= Math.sqrt((player.x-x)*(player.x-x) + (player.y-y)*(player.y-y) );
+  return distance< size+player.heightHalf; // 
 
 }
+
 
 // Gets the tile value at an X and Y value
 function getTile(x, y) {
@@ -623,24 +707,10 @@ function randomLevel(l_height,l_width){
           }
         }       
 
-        for (let j = 1; j < l_width -1; j++){
-          var vyska=0;
-          while( vyska< l_height-2 && l[vyska][j]=="0"){
-            vyska++;
-          }
-          if(vyska==l_height-2){
-            const random = Math.random();
-            if(random>.4 + (0.02*craters.length) ) {// todo zvětšit
-              l[vyska][j]="crater";
-              var crate={x:j*32,y:vyska*32}
-              craters.unshift(crate);
-
-            }
-          }
+        
 
 
 
-        }
 
         
         if(l[i][j]=="0"){
@@ -677,6 +747,28 @@ function randomLevel(l_height,l_width){
         }   
       }
     }
+
+
+    for (let j = 1; j < l_width -1; j++){
+      var vyska=0;
+      while( vyska< l_height-2 && l[vyska][j]=="0"){
+        vyska++;
+      }
+      
+      if(vyska==l_height-2){
+        const random = Math.random();
+        if(random>.6) {
+          l[vyska][j]="crater";
+          var crate={x:j*32,y:vyska*32}
+          craters.unshift(crate);
+
+        }
+        if(random <0.3  ){ 
+            l[vyska][j]="baloon";
+        }
+      }
+    }
+
 
 
         for (let j = 3; j < l_width -3; j++){
