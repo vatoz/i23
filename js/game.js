@@ -5,7 +5,7 @@ img.src= "sprites0.png";
 
 
 function drawDebug(x,y){ 
-//  return false;
+   return false;
   // Define a new Path:
     c.beginPath();
     c.fillStyle = "black";
