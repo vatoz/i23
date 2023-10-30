@@ -44,7 +44,7 @@ let chillicount=1;
 let chilli =false;
 let king =false;
 let angel=false;
-let devil=true;
+let devil=false;
 
 
 
