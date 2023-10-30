@@ -617,9 +617,9 @@ function getTile(x, y) {
 }
 
 function randomLevel(l_height,l_width){
-  let safe=false;
+  var safe=false;
   let l = [];
-  let sword=false;
+  var sword=false;
   const noise = 0.8;
   for (let i = 0; i < l_height; i++){
     l.push([]);
@@ -799,12 +799,12 @@ function randomLevel(l_height,l_width){
 
             }
           }else if ( random > 0.78 && !safe){
-            let safe=true;
+            safe=true;
             l[i][j]="safe";
 
           }else if(random>0.75 && !sword){
             l[i][j]="stone_sword";
-            let sword=true;
+            sword=true;
           
           }
           }
@@ -821,7 +821,7 @@ function randomLevel(l_height,l_width){
       
       if(vyska==l_height-2){
         const random = Math.random();
-        if(random>.6) {
+        if(random>.6 && l[vyska][j]=="0") {
           l[vyska][j]="crater";
           var crate={x:j*32,y:vyska*32}
           craters.unshift(crate);
