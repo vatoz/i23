@@ -697,7 +697,7 @@ function randomLevel(l_height,l_width){
 
   for (let i = 0; i < l_height; i++){
     l[i][0] = "floor_"+  Math.floor(Math.random()*4);   
-    l[i][l_width-1] = "castle_floor_" + Math.floor(Math.random()*4);    
+    l[i][l_width-1] = "castle_floor_" + Math.floor(Math.random()*2.3);    
   }
   
   for (let j = 0; j <= zone_1_end; j++){
