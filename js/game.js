@@ -41,6 +41,7 @@ let craters=[];
 let droplets=[];
 let decorations=[];
 let chilli =false;
+let king =false;
 
 
 
@@ -276,6 +277,7 @@ const basic_tiles = [ "floor_0", "floor_1",   "floor_2","floor_3", "castle_floor
     }else{
       p_sprite="human";
     }
+    if(king) sprite_draw("king" ,player.x-16- viewport_x,player.y-32+(player.height/2));
     sprite_draw(p_sprite ,player.x-16- viewport_x,player.y-32+(player.height/2));
   }
 
@@ -289,7 +291,7 @@ const basic_tiles = [ "floor_0", "floor_1",   "floor_2","floor_3", "castle_floor
   //drawDebug(player.x-player.widthHalf,player.y-player.heightHalf);
   //drawDebug(player.x+player.widthHalf,player.y+player.heightHalf);
 
-  const front_tiles = [ "bed","crater","chilli","heal","gold","safe" ];
+  const front_tiles = [ "bed","crater","chilli","heal","gold","safe" ,"stone","stone_sword"];
   for (let row = 0; row < currentLevel.length; row++) {
     // Loop through each character in line
     for (let col = 0; col < currentLevel[0].length; col++) {
@@ -424,6 +426,7 @@ function player_kill(li){
       player.x=256;
       player.y=0;
       chilli=false;
+      king=false;
   }else{
     killtick=tick;
     
@@ -562,6 +565,11 @@ function input() {
     player.gold++;
     currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="0";
   }
+  if(t=="stone_sword"){
+    king=true;
+    currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="stone";
+  }
+  
   if(t=="safe"){
     player.gold+=15;
     currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="0";
@@ -611,6 +619,7 @@ function getTile(x, y) {
 function randomLevel(l_height,l_width){
   let safe=false;
   let l = [];
+  let sword=false;
   const noise = 0.8;
   for (let i = 0; i < l_height; i++){
     l.push([]);
@@ -793,8 +802,11 @@ function randomLevel(l_height,l_width){
             let safe=true;
             l[i][j]="safe";
 
+          }else if(random>0.75 && !sword){
+            l[i][j]="stone_sword";
+            let sword=true;
+          
           }
-
           }
         }   
       }
