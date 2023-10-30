@@ -619,6 +619,7 @@ function getTile(x, y) {
 function randomLevel(l_height,l_width){
   let safe=false;
   let l = [];
+  let sword=false;
   const noise = 0.8;
   for (let i = 0; i < l_height; i++){
     l.push([]);
@@ -801,8 +802,9 @@ function randomLevel(l_height,l_width){
             let safe=true;
             l[i][j]="safe";
 
-          }else if(random>0.75){
+          }else if(random>0.75 && !sword){
             l[i][j]="stone_sword";
+            let sword=true;
           
           }
           }
