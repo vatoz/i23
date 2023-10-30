@@ -40,10 +40,11 @@ let clouds=[];
 let craters=[];
 let droplets=[];
 let decorations=[];
-
+let chillicount=1;
 let chilli =false;
 let king =false;
 let angel=false;
+let devil=true;
 
 
 
@@ -131,7 +132,7 @@ function gravity(obj) {
   if(obj.yke>30){obj.yke=30;}
   if(obj.yke<-30){obj.yke=-30;}
   
-  if (obj.yke>0){ //skok
+  if (obj.yke>0){ 
     // Minus object Y value by object Y Kinetic Energy
     obj.y -= obj.yke;
   }else if (!isWall(getTile(obj.x - obj.widthHalf, (obj.y + obj.heightHalf)))  && !isWall(getTile(obj.x +obj.widthHalf, (obj.y + obj.heightHalf)))) {
@@ -151,11 +152,16 @@ function gravity(obj) {
   if (isWall(getTile(obj.x-obj.widthHalf, obj.y-obj.heightHalf)) || isWall(getTile(obj.x+obj.widthHalf, obj.y-obj.heightHalf))) {
     // If object is jumping
     if (obj.yke > 0){
+      if(!devil || isWall(getTile(obj.x-obj.widthHalf, obj.y-obj.heightHalf-32)) || isWall(getTile(obj.x+obj.widthHalf, obj.y-obj.heightHalf-32)) ){
+        // Set Y Kinetic Energy to -0.5
+        obj.yke = -0.1;
+        // Add 1 to Object Y (To Avoid Collision Error)
+        obj.y += 1; //todo asi musím zaokrouhlit
+      }else{
+        
+        console.log("object devil jump");
 
-      // Set Y Kinetic Energy to -0.5
-    obj.yke = -0.1;
-    // Add 1 to Object Y (To Avoid Collision Error)
-    obj.y += 1; //todo asi musím zaokrouhlit
+      }
     }
   } else {
     // If Tile at object's feet location is a wall
@@ -362,7 +368,7 @@ const basic_tiles = [ "floor_0", "floor_1",   "floor_2","floor_3", "castle_floor
 
   for(let crater_id=0;crater_id<craters.length;crater_id++){
       var crater=craters[crater_id];          
-        var crater_ticks= tick % ( crater.x*2    +40)   
+        var crater_ticks= (crater.y+tick) % ( crater.y*1.4    +40)   
         var y= -31+crater_ticks*3;
 
         if(y<crater.y){
@@ -403,6 +409,9 @@ const basic_tiles = [ "floor_0", "floor_1",   "floor_2","floor_3", "castle_floor
   }
   if(angel){
     sprite_draw("angel", 16+16+16+player.health*16,0);
+  }
+  if(devil){
+    sprite_draw("devil", 16+16+16+16+player.health*16,0);
   }
 
   for(let h=0;h<player.gold %5;h++){
@@ -546,6 +555,10 @@ function input() {
      if(chilli){
       if(getTile(player.x,player.y - 1)=="0"){
         currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="chilli";
+        chillicount++;
+        if(chillicount==5){
+          devil=true;
+        }
       }
      }
     }
