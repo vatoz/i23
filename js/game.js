@@ -239,11 +239,11 @@ function draw() {
 
   // Set the fill colour to black
   c.fillStyle = "black";
-const basic_tiles = [ "floor_0", "floor_1",   "floor_2","floor_3", "castle_floor_0", "castle_floor_1" ,"grave","cimburi" ,
+const basic_tiles = [ "floor_0", "floor_1",   "floor_2","floor_3", "castle_floor_0", "castle_floor_1" ,"castle_floor_2","grave","cimburi" ,
 "castle_wall_0","castle_wall_1","castle_wall_2","castle_wall_3","castle_wall_4","castle_wall_5",
 "castle_decoration_0","castle_decoration_1", "castle_decoration_2",
 "castle_err_0","castle_err_1","castle_err_2","castle_err_3","castle_err_4","castle_err_5",
-"castle_upper_0","castle_upper_1"
+"castle_upper_0","castle_upper_1","castle_upper_2","castle_upper_3","castle_upper_4"
 
 
 ];
@@ -442,6 +442,7 @@ function isWall(a){
   if(a=="grave") return true;
   if(a=="castle_floor_0") return true;
   if(a=="castle_floor_1") return true;
+  if(a=="castle_floor_2") return true;
   return false;
 }
 
@@ -691,20 +692,20 @@ function randomLevel(l_height,l_width){
 
   
   for (let i = 1; i < l_height; i++){
-    l[i][zone_1_end+1] = "castle_floor_1";    
+    l[i][zone_1_end+1] = "castle_floor_"+ Math.floor(Math.random()*2.3);    
   }
 
   for (let i = 0; i < l_height; i++){
-    l[i][0] = "floor_3";   
-    l[i][l_width-1] = "castle_floor_1";    
+    l[i][0] = "floor_"+  Math.floor(Math.random()*4);   
+    l[i][l_width-1] = "castle_floor_" + Math.floor(Math.random()*4);    
   }
   
   for (let j = 0; j <= zone_1_end; j++){
-    l[l_height-1][j] = "floor_3";    
+    l[l_height-1][j] = "floor_"+ Math.floor(Math.random()*3);    
   }
 
   for (let j = zone_1_end+1; j <= l_width; j++){
-    l[l_height-1][j] = "castle_floor_1";    
+    l[l_height-1][j] = "castle_floor_" + Math.floor(Math.random()*2.3) ;    
   }
 
 
