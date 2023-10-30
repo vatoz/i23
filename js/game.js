@@ -40,8 +40,10 @@ let clouds=[];
 let craters=[];
 let droplets=[];
 let decorations=[];
+
 let chilli =false;
 let king =false;
+let angel=false;
 
 
 
@@ -243,7 +245,7 @@ const basic_tiles = [ "floor_0", "floor_1",   "floor_2","floor_3", "castle_floor
 "castle_wall_0","castle_wall_1","castle_wall_2","castle_wall_3","castle_wall_4","castle_wall_5",
 "castle_decoration_0","castle_decoration_1", "castle_decoration_2",
 "castle_err_0","castle_err_1","castle_err_2","castle_err_3","castle_err_4","castle_err_5",
-"castle_upper_0","castle_upper_1","castle_upper_2","castle_upper_3","castle_upper_4"
+"castle_upper_0","castle_upper_1","castle_upper_2","castle_upper_3","castle_upper_4","angel"
 
 
 ];
@@ -396,6 +398,12 @@ const basic_tiles = [ "floor_0", "floor_1",   "floor_2","floor_3", "castle_floor
   if(chilli){
     sprite_draw("chilli", 16+player.health*16,0);
   }
+  if(king){
+    sprite_draw("crown", 16+16+player.health*16,0);
+  }
+  if(angel){
+    sprite_draw("angel", 16+16+16+player.health*16,0);
+  }
 
   for(let h=0;h<player.gold %5;h++){
     sprite_draw("gold",512-32- (h*16) ,0);
@@ -427,6 +435,7 @@ function player_kill(li){
       player.y=0;
       chilli=false;
       king=false;
+      angel=false;
   }else{
     killtick=tick;
     
@@ -533,6 +542,7 @@ function input() {
     if (!isWall(getTile(player.x-player.widthHalf,player.y -player.heightHalf) ) && !isWall(getTile(player.x -player.widthHalf ,player.y - player.heightHalf))){
     // Increase player's y axis kinetic energy by 8 (jump)
      player.yke += 8;
+     if(angel) player.yke += 5;
      if(chilli){
       if(getTile(player.x,player.y - 1)=="0"){
         currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="chilli";
@@ -581,6 +591,12 @@ function input() {
       player_kill(1);
     }    
   }
+  if(t=="angel"){
+    angel=true;
+    //currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="0";
+  }
+
+
 
 
 
@@ -621,6 +637,7 @@ function randomLevel(l_height,l_width){
   var safe=false;
   let l = [];
   var sword=false;
+  var haveangel=false;
   const noise = 0.8;
   for (let i = 0; i < l_height; i++){
     l.push([]);
@@ -807,6 +824,11 @@ function randomLevel(l_height,l_width){
             l[i][j]="stone_sword";
             sword=true;
           
+          } else if(random>0.73 && !haveangel){
+            l[i][j]="angel";
+            haveangel=true;
+
+
           }
           }
         }   
