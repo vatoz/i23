@@ -3,13 +3,12 @@ const c = document.getElementById("canvas").getContext("2d");
 let img = new Image();
 img.src= "sprites0.png";
 
-const zone_1_end =80;
-
+const zone_1_end =10;
+const zone_2_end =20;
 function col_to_zone( col){
   if(col<=zone_1_end ) return 1;
-  return 2;
-
-
+  if(col<=zone_1_end ) return 2;
+  return 3;
 }
 
 function drawDebug(x,y){ 
@@ -45,6 +44,7 @@ let chilli =false;
 let king =false;
 let angel=false;
 let devil=false;
+let horse=false;
 
 
 
@@ -251,7 +251,7 @@ const basic_tiles = [ "floor_0", "floor_1",   "floor_2","floor_3", "castle_floor
 "castle_wall_0","castle_wall_1","castle_wall_2","castle_wall_3","castle_wall_4","castle_wall_5",
 "castle_decoration_0","castle_decoration_1", "castle_decoration_2",
 "castle_err_0","castle_err_1","castle_err_2","castle_err_3","castle_err_4","castle_err_5",
-"castle_upper_0","castle_upper_1","castle_upper_2","castle_upper_3","castle_upper_4","angel"
+"castle_upper_0","castle_upper_1","castle_upper_2","castle_upper_3","castle_upper_4","angel","portal"
 
 
 ];
@@ -285,7 +285,17 @@ const basic_tiles = [ "floor_0", "floor_1",   "floor_2","floor_3", "castle_floor
     }else{
       p_sprite="human";
     }
-    if(king) sprite_draw("king" ,player.x-16- viewport_x,player.y-32+(player.height/2));
+    
+    if(horse){
+        if(player.direction>0){
+            p_sprite = "horse_" + Math.floor((tick /10)  % 10); 
+        }else{
+            p_sprite = "horse_11";
+        }
+    
+    }
+    
+    if(king && !horse) sprite_draw("king" ,player.x-16- viewport_x,player.y-32+(player.height/2));
     sprite_draw(p_sprite ,player.x-16- viewport_x,player.y-32+(player.height/2));
   }
 
@@ -521,8 +531,9 @@ function parseLevel(lvl) {
 function input() {
   if(player.baloon) return true;
 
+   
   // If A is Down
-  if (65 in keysDown) {
+  if (65 in keysDown && !horse) {
     // Check if tile at player location after move is colliding with a wall
     if (!isWall(getTile((player.x - player.speed - player.widthHalf) + 1, player.y + player.heightHalf-2))  && player.x > 1&& !isWall(getTile((player.x - player.speed -player.widthHalf) + 1, player.y - player.heightHalf ))){
       // Move player left by player speed
@@ -530,6 +541,15 @@ function input() {
       if(player.direction<0){player.direction--;}else{player.direction=-1;}
     }
   }else if(player.direction<0){player.direction=0;}
+
+
+    //s
+    if (83 in keysDown) {
+        horse=false;
+        player.baloon=false;
+    
+    }
+
 
   // If D is Down
   if (68 in keysDown) {
@@ -545,6 +565,8 @@ function input() {
     }
   }else if(player.direction>0){player.direction=0;} 
 
+
+    
   // If W is Down and Player's kinetic energy (in Y Axis) is 0
   if (87 in keysDown && player.yke === 0) {
     // Checks if tile directly above player is a wall
@@ -592,6 +614,9 @@ function input() {
   if(t=="stone_sword"){
     king=true;
     currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="stone";
+  }
+  if(t=="portal"){
+    horse=true;    
   }
   
   if(t=="safe"){
@@ -675,7 +700,7 @@ function randomLevel(l_height,l_width){
   
   var last_hrad=0;
   var cur_hrad=0;
-  for (let j =  zone_1_end+2;j<l_width; j++){
+  for (let j =  zone_1_end+2;j<zone_2_end; j++){
     const random=  Math.random();
     cur_hrad=last_hrad;
     if(random>0.9){
@@ -734,8 +759,16 @@ function randomLevel(l_height,l_width){
     l[l_height-1][j] = "floor_"+ Math.floor(Math.random()*3);    
   }
 
-  for (let j = zone_1_end+1; j <= l_width; j++){
+  for (let j = zone_1_end+1; j <= zone_2_end; j++){
     l[l_height-1][j] = "castle_floor_" + Math.floor(Math.random()*2.3) ;    
+  }
+  
+  l[l_height-2][zone_2_end+1]="portal";
+  l[l_height-3][zone_2_end+1]="portal";
+  l[l_height-4][zone_2_end+1]="portal";
+  
+  for (let j = zone_2_end+1; j <= l_width -1; j++){
+    l[l_height-1][j] = "floor_" + Math.floor(Math.random()*3) ;    
   }
 
 
