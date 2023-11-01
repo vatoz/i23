@@ -3,8 +3,8 @@ const c = document.getElementById("canvas").getContext("2d");
 let img = new Image();
 img.src= "sprites0.png";
 
-const zone_1_end =10;
-const zone_2_end =20;
+const zone_1_end =50;
+const zone_2_end =70;
 function col_to_zone( col){
   if(col<=zone_1_end ) return 1;
   if(col<=zone_1_end ) return 2;
