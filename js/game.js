@@ -378,7 +378,7 @@ const basic_tiles = [ "floor_0", "floor_1",   "floor_2","floor_3", "castle_floor
 
   for(let crater_id=0;crater_id<craters.length;crater_id++){
       var crater=craters[crater_id];          
-        var crater_ticks= (crater.y+tick) % ( crater.y*1.4    +40)   
+        var crater_ticks= (crater.x*370 +tick) % ( crater.y)   
         var y= -31+crater_ticks*3;
 
         if(y<crater.y){
@@ -546,8 +546,6 @@ function input() {
     //s
     if (83 in keysDown) {
         horse=false;
-        player.baloon=false;
-    
     }
 
 
@@ -616,7 +614,9 @@ function input() {
     currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="stone";
   }
   if(t=="portal"){
-    horse=true;    
+    horse=true;
+    angel=false;
+    devil=false;    
   }
   
   if(t=="safe"){
@@ -772,8 +772,8 @@ function randomLevel(l_height,l_width){
   }
 
 
-  l[0][1] = "4";   
-  l[0][2] = "3";   
+  l[0][1] = "floor_4";   
+  l[0][2] = "floor_3";   
   l[1][1] = "0";   
 
   l[4][4] = "chilli";   
@@ -882,7 +882,7 @@ function randomLevel(l_height,l_width){
     }
 
 
-    for (let j = 1; j < l_width -1; j++){
+    for (let j = 1; j < zone_2_end -1; j++){
       var vyska=0;
       while( vyska< l_height-2 && l[vyska][j]=="0"){
         vyska++;
@@ -954,7 +954,7 @@ window.onload = function () {
   // Prepare Level
   // currentLevel = parseLevel(level);
   currentLevel = randomLevel(16, 100 );
-  initClouds(100*32);
+  initClouds(570);
   // Start Platformer
   main();
 }
