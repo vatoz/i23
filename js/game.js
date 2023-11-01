@@ -166,6 +166,15 @@ function gravity(obj) {
   } else {
     // If Tile at object's feet location is a wall
     if (isWall(getTile(obj.x - obj.widthHalf, (obj.y + obj.heightHalf)))  || isWall(getTile(obj.x +obj.widthHalf, (obj.y + obj.heightHalf)))) {
+      if(getTile(obj.x , (obj.y + obj.heightHalf)  ).startsWith("ball")){
+        if (obj.yke < 0){
+          // na míčích se skáče
+          obj.yke = -obj.yke;
+          return true;
+        }
+
+
+      }
       // If player is falling
       if (obj.yke < 0){
         // Set Y Kinetic Energy to 0
@@ -251,7 +260,8 @@ const basic_tiles = [ "floor_0", "floor_1",   "floor_2","floor_3", "castle_floor
 "castle_wall_0","castle_wall_1","castle_wall_2","castle_wall_3","castle_wall_4","castle_wall_5",
 "castle_decoration_0","castle_decoration_1", "castle_decoration_2",
 "castle_err_0","castle_err_1","castle_err_2","castle_err_3","castle_err_4","castle_err_5",
-"castle_upper_0","castle_upper_1","castle_upper_2","castle_upper_3","castle_upper_4","angel","portal"
+"castle_upper_0","castle_upper_1","castle_upper_2","castle_upper_3","castle_upper_4","angel","portal",
+"ball_0","ball_1","ball_2","ball_3","ball_4","ball_5",
 
 
 ];
@@ -463,15 +473,18 @@ function player_kill(li){
 
 function isWall(a){
   if(a=="0") return false;
-  if(a=="floor_0") return true;
-  if(a=="floor_1") return true;
-  if(a=="floor_2") return true;
-  if(a=="floor_3") return true;
-  if(a=="grave") return true;
-  if(a=="castle_floor_0") return true;
-  if(a=="castle_floor_1") return true;
-  if(a=="castle_floor_2") return true;
+  const wall_tiles = [ 
+    "floor_0", "floor_1",   "floor_2","floor_3",
+    "castle_floor_0", "castle_floor_1" ,"castle_floor_2",
+    "grave",
+    "ball_0","ball_1","ball_2","ball_3","ball_4","ball_5",
+  ];
+
+  for(let ind=0; ind<wall_tiles.length;ind++){
+    if(a==wall_tiles[ind]) return true;
+  }
   return false;
+  
 }
 
 function animate_water(col,row, delay){
@@ -866,16 +879,19 @@ function randomLevel(l_height,l_width){
             safe=true;
             l[i][j]="safe";
 
-          }else if(random>0.75 && !sword){
+          }else if(random>0.78 && !sword){
             l[i][j]="stone_sword";
             sword=true;
           
-          } else if(random>0.73 && !haveangel){
+          } else if(random>0.78 && !haveangel){
             l[i][j]="angel";
             haveangel=true;
 
 
+          }else if (random>0.77 && isWall(l[i+1][j])){
+            l[i][j]="ball_"+ Math.floor(Math.random()*6);
           }
+
           }
         }   
       }
