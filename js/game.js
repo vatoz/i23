@@ -236,6 +236,9 @@ function draw() {
   c.fillStyle = grd;
   c.fillRect(0, 0, 512, 512);
 
+  //sprite_draw("moon", 180,250+ Math.sin( (player.x/4000) -3)*150);
+  c.drawImage(img,sprites["moon"].x+1,sprites["moon"].y+1,sprites["moon"].w-2,sprites["moon"].h-2,   180,250+ Math.sin( (tick/23000) -3)*150,  sprites["moon"].w-2,sprites["moon"].h  -2  );
+
 
   draw_clouds(4);
   sprite_draw("grass_3",- (viewport_x -256)/(vWidth-512 )*(580-512),512-32-156);
@@ -592,7 +595,7 @@ function input() {
     if (!isWall(getTile(player.x-player.widthHalf,player.y -player.heightHalf) ) && !isWall(getTile(player.x -player.widthHalf ,player.y - player.heightHalf))){
     // Increase player's y axis kinetic energy by 8 (jump)
      player.yke += 8;
-     if(frozen) player.yke-=5;
+     
      if(angel) player.yke += 5;
 
      if(chilli){
