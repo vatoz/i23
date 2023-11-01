@@ -3,16 +3,18 @@ const c = document.getElementById("canvas").getContext("2d");
 let img = new Image();
 img.src= "sprites0.png";
 
-const zone_1_end =50;
-const zone_2_end =70;
+const zone_1_end =40;
+const zone_2_end =66;
 function col_to_zone( col){
   if(col<=zone_1_end ) return 1;
   if(col<=zone_1_end ) return 2;
   return 3;
 }
 
+
+
+
 function drawDebug(x,y){ 
-   return false;
   // Define a new Path:
     c.beginPath();
     c.fillStyle = "black";
@@ -39,6 +41,8 @@ let clouds=[];
 let craters=[];
 let droplets=[];
 let decorations=[];
+let balls=[];
+
 let chillicount=1;
 let chilli =false;
 let king =false;
@@ -51,6 +55,7 @@ let horse=false;
 
 // The Player Object:
 const player = {
+  is:"player",
   // Player's X Position
   x: 256,
   // Player's Y Position
@@ -169,10 +174,16 @@ function gravity(obj) {
       // If player is falling
       if (obj.yke < 0){
         // Set Y Kinetic Energy to 0
-        obj.yke = 0;
-        // Minus object's Y value so it sits directly on the floor 
-        obj.y -= (obj.y % 32)-obj.height;
-        obj.y= Math.floor(obj.y);
+        if(obj.is=="ball"){
+            obj.yke=-obj.yke*0.95 + (Math.random() *3) ;
+
+        }else {
+          obj.yke = 0;
+          // Minus object's Y value so it sits directly on the floor 
+          obj.y -= (obj.y % 32)-obj.height;
+          obj.y= Math.floor(obj.y);
+        }
+        
         
       }
     }
@@ -279,9 +290,9 @@ const basic_tiles = [ "floor_0", "floor_1",   "floor_2","floor_3", "castle_floor
   if(!player.baloon){
     var p_sprite="human";
     if(player.direction >0){
-        p_sprite="human_r_"+ Math.floor(player.direction  % 2 );
+        p_sprite="human_r_"+ Math.floor((tick /5)  % 2 );
     }else if(player.direction <0){
-      p_sprite="human_l_"+  Math.floor((-player.direction)  % 2 );;
+      p_sprite="human_l_"+  Math.floor((tick /5)  % 2 );;
     }else{
       p_sprite="human";
     }
@@ -374,6 +385,16 @@ const basic_tiles = [ "floor_0", "floor_1",   "floor_2","floor_3", "castle_floor
         sprite_draw("spider" ,col * 32 - viewport_x  , row * 32 + offset -10);
       }
     }
+  }
+
+  for(let ball_id=0;ball_id<balls.length;ball_id++){
+    var ball=balls[ball_id];          
+    sprite_draw("ball_"+ Math.floor(6 - ((ball.x /8)  %6  )  ), ball.x- viewport_x -16 ,ball.y-16);
+    drawDebug(ball.x+ball.widthHalf,ball.y+ball.heightHalf);
+    drawDebug(ball.x-ball.widthHalf,ball.y-ball.heightHalf);
+    //ball.x+=0.1 ;
+    gravity(balls[ball_id]);
+
   }
 
   for(let crater_id=0;crater_id<craters.length;crater_id++){
@@ -538,7 +559,7 @@ function input() {
     if (!isWall(getTile((player.x - player.speed - player.widthHalf) + 1, player.y + player.heightHalf-2))  && player.x > 1&& !isWall(getTile((player.x - player.speed -player.widthHalf) + 1, player.y - player.heightHalf ))){
       // Move player left by player speed
       player.x -= player.speed;
-      if(player.direction<0){player.direction--;}else{player.direction=-1;}
+      player.direction=-1;
     }
   }else if(player.direction<0){player.direction=0;}
 
@@ -558,7 +579,7 @@ function input() {
     ) {
       // Move player right by player speed
       player.x += player.speed;
-      if(player.direction>0){player.direction++;}else{player.direction=1;}
+      player.direction=1;
       
     }
   }else if(player.direction>0){player.direction=0;} 
@@ -931,6 +952,28 @@ function randomLevel(l_height,l_width){
   l[l_height-2][l_width-2]="bed";
   l[1][4]="0";
   l[2][4]="0";
+
+        let ball= {
+          is:"ball",
+          // Player's X Position
+          x: 296,
+          // Player's Y Position
+          y: 45,
+          // Width of Player (when drawn)
+          widthHalf: 14,
+          width: 28,
+          // Height of Player (when drawn)
+          heightHalf:14,
+          height: 28,
+          // Gravitational Potential Energy (for use with jumping)
+          gpe: 0,
+          // Kinetic Energy on the Y axis (for use with jumping)
+          yke: 0,
+          // Player's mass (for use with jumping)
+          mass: 40  // Player's Speed (pixels)
+        }
+    balls.unshift(ball);    
+
 
   return l;
 }
