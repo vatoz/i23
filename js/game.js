@@ -7,7 +7,7 @@ const zone_1_end =50;
 const zone_2_end =70;
 function col_to_zone( col){
   if(col<=zone_1_end ) return 1;
-  if(col<=zone_1_end ) return 2;
+  if(col<=zone_2_end ) return 2;
   return 3;
 }
 
@@ -262,7 +262,7 @@ const basic_tiles = [ "floor_0", "floor_1",   "floor_2","floor_3", "castle_floor
 "castle_err_0","castle_err_1","castle_err_2","castle_err_3","castle_err_4","castle_err_5",
 "castle_upper_0","castle_upper_1","castle_upper_2","castle_upper_3","castle_upper_4","angel","portal",
 "ball_0","ball_1","ball_2","ball_3","ball_4","ball_5",
-
+"frost_0","frost_1","frost_2","frost_3",
 
 ];
   // Loop through level lines
@@ -475,6 +475,7 @@ function isWall(a){
   if(a=="0") return false;
   const wall_tiles = [ 
     "floor_0", "floor_1",   "floor_2","floor_3",
+    "frost_0","frost_1","frost_2","frost_3",
     "castle_floor_0", "castle_floor_1" ,"castle_floor_2",
     "grave",
     "ball_0","ball_1","ball_2","ball_3","ball_4","ball_5",
@@ -543,6 +544,11 @@ function parseLevel(lvl) {
 // 87 -> W, 65 -> A, 83 -> S, 68 -> D
 function input() {
   if(player.baloon) return true;
+  var frozen=false;
+  if(getTile(player.x ,player.y + player.heightHalf + 1).startsWith("frost")){
+    frozen=true;
+  }
+
 
    
   // If A is Down
@@ -553,7 +559,7 @@ function input() {
       player.x -= player.speed;
       if(player.direction<0){player.direction--;}else{player.direction=-1;}
     }
-  }else if(player.direction<0){player.direction=0;}
+  }else if(player.direction<0&&!frozen){player.direction=0;}
 
 
     //s
@@ -574,7 +580,7 @@ function input() {
       if(player.direction>0){player.direction++;}else{player.direction=1;}
       
     }
-  }else if(player.direction>0){player.direction=0;} 
+  }else if(player.direction>0&&!frozen){player.direction=0;} 
 
 
     
@@ -584,7 +590,9 @@ function input() {
     if (!isWall(getTile(player.x-player.widthHalf,player.y -player.heightHalf) ) && !isWall(getTile(player.x -player.widthHalf ,player.y - player.heightHalf))){
     // Increase player's y axis kinetic energy by 8 (jump)
      player.yke += 8;
+     if(frozen) player.yke-=5;
      if(angel) player.yke += 5;
+
      if(chilli){
       if(getTile(player.x,player.y - 1)=="0"){
         currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="chilli";
@@ -596,6 +604,18 @@ function input() {
      }
     }
     }
+
+  if (frozen&&player.direction!==0){
+      if(player.direction>0){
+        player.x+=1;
+
+      } else   if(player.direction<0){
+        player.x-=1;
+
+      }else{
+ 
+      }
+  }
 
   if(player.x>256){
     viewport_x=player.x-256;
@@ -776,12 +796,18 @@ function randomLevel(l_height,l_width){
     l[l_height-1][j] = "castle_floor_" + Math.floor(Math.random()*2.3) ;    
   }
   
-  l[l_height-2][zone_2_end+1]="portal";
-  l[l_height-3][zone_2_end+1]="portal";
-  l[l_height-4][zone_2_end+1]="portal";
   
   for (let j = zone_2_end+1; j <= l_width -1; j++){
     l[l_height-1][j] = "floor_" + Math.floor(Math.random()*3) ;    
+    if(j>zone_2_end+5 && Math.random()>0.88){
+      for (let i = j-5; i <= j -1; i++){
+        l[l_height-1][i] = "frost_" + Math.floor(Math.random()*3) ;    
+
+      }
+
+
+    }
+
   }
 
 
@@ -890,6 +916,8 @@ function randomLevel(l_height,l_width){
 
           }else if (random>0.77 && isWall(l[i+1][j])){
             l[i][j]="ball_"+ Math.floor(Math.random()*6);
+          }else if (random>0.4 &&col_to_zone(j)==2 ){
+            l[i][j]="portal";
           }
 
           }
