@@ -256,14 +256,16 @@ function draw() {
 
   // Set the fill colour to black
   c.fillStyle = "black";
-const basic_tiles = [ "floor_0", "floor_1",   "floor_2","floor_3", "castle_floor_0", "castle_floor_1" ,"castle_floor_2","grave","cimburi" ,
-"castle_wall_0","castle_wall_1","castle_wall_2","castle_wall_3","castle_wall_4","castle_wall_5",
-"castle_wborder_0","castle_wborder_1","castle_wborder_2","castle_wborder_3",
-"castle_decoration_0","castle_decoration_1", "castle_decoration_2","castle_decoration_3",
-"castle_err_0","castle_err_1","castle_err_2","castle_err_3","castle_err_4","castle_err_5",
-"castle_upper_0","castle_upper_1","castle_upper_2","castle_upper_3","castle_upper_4","angel","portal",
-"ball_0","ball_1","ball_2","ball_3","ball_4","ball_5",
-"frost_0","frost_1","frost_2","frost_3",
+const basic_tiles = [ 
+"floor_", 
+"castle_floor_","grave","cimburi" ,
+"castle_wall_",
+"castle_wborder_",
+"castle_decoration_",
+"castle_err_",
+"castle_upper_","angel","portal",
+"ball_",
+"frost_"
 
 ];
   // Loop through level lines
@@ -272,9 +274,8 @@ const basic_tiles = [ "floor_0", "floor_1",   "floor_2","floor_3", "castle_floor
     for (let col = 0; col < currentLevel[0].length; col++) {
       // If character is 1 (a wall) 
       for(let ind=0; ind<basic_tiles.length;ind++){
-        if(currentLevel[row][col] === basic_tiles[ind]){
-          sprite_draw(basic_tiles[ind] ,col * 32 - viewport_x, row * 32);
-
+        if(currentLevel[row][col].startsWith( basic_tiles[ind])){
+          sprite_draw(currentLevel[row][col] ,col * 32 - viewport_x, row * 32);
         }
       }
 
@@ -475,15 +476,15 @@ function player_kill(li){
 function isWall(a){
   if(a=="0") return false;
   const wall_tiles = [ 
-    "floor_0", "floor_1",   "floor_2","floor_3",
-    "frost_0","frost_1","frost_2","frost_3",
-    "castle_floor_0", "castle_floor_1" ,"castle_floor_2",
+    "floor_",
+    "frost_",
+    "castle_floor_",
     "grave",
-    "ball_0","ball_1","ball_2","ball_3","ball_4","ball_5",
+    "ball_"
   ];
 
   for(let ind=0; ind<wall_tiles.length;ind++){
-    if(a==wall_tiles[ind]) return true;
+    if(a.startsWith(wall_tiles[ind])) return true;
   }
   return false;
   
@@ -748,6 +749,9 @@ function randomLevel(l_height,l_width){
     for(let horni=1;horni<cur_hrad;horni++){
       if(l[horni][j-1].startsWith("castle_wall") ){
         l[horni][j-1] = "castle_wborder_" +Math.floor(Math.random()*4);    
+      }
+      if(l[horni][j-1].startsWith("castle_floor") ){
+        l[horni][j-1] = "castle_floor_3";    
       }
 
 
