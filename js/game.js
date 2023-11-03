@@ -3,6 +3,7 @@ const c = document.getElementById("canvas").getContext("2d");
 let img = new Image();
 img.src= "sprites0.png";
 
+
 const zone_1_end =50;
 const zone_2_end =70;
 function col_to_zone( col){
@@ -12,7 +13,7 @@ function col_to_zone( col){
 }
 
 function drawDebug(x,y){ 
-   return false;
+  return false;
   // Define a new Path:
     c.beginPath();
     c.fillStyle = "black";
@@ -46,7 +47,8 @@ let angel=false;
 let devil=false;
 let horse=false;
 
-
+let water_on=true;
+let water_level = (16-3)*32;
 
 
 // The Player Object:
@@ -268,7 +270,7 @@ const basic_tiles = [
 "castle_err_",
 "castle_upper_","angel","portal",
 "ball_",
-"frost_"
+"frost_","water_o","switch_o", "castle_coin","castle_safe"
 
 ];
   // Loop through level lines
@@ -287,7 +289,26 @@ const basic_tiles = [
       }      
       if (currentLevel[row][col] === "water_frog") {       //to samé, ale už bylo vylepšeno
         animate_water(col , row,150);
-      }      
+      }
+
+      if(col_to_zone(col)==2){
+        if(row >= currentLevel.length-3 &&col<zone_2_end-1){
+          if (! (currentLevel[row][col].startsWith("castle_floor"))){            
+            if(water_level>=row*32 && water_level<(row+1)*32 ){              
+              c.fillStyle = "blue";
+              c.fillRect(col*32-viewport_x,water_level,32, (   (row+1)*32 -water_level)   );  
+            }else if( water_level<row*32) {
+              c.fillStyle = "blue";
+              c.fillRect(col*32 -viewport_x,row*32,32,32);
+            }
+
+          }
+
+
+          
+        }
+      }
+      
     }
   }
 
@@ -448,9 +469,13 @@ const basic_tiles = [
    }
   }
 
-
-
   tick++;
+  if(!water_on && water_level<(15*32 -5) ){
+    if(tick %25 ==1){
+      water_level++;
+    }
+  }
+
 }
 
 
@@ -557,7 +582,7 @@ function input() {
 
    
   // If A is Down
-  if (65 in keysDown && !horse) {
+  if ((65 in keysDown ||37 in keysDown) && !horse) {
     // Check if tile at player location after move is colliding with a wall
     if (!isWall(getTile((player.x - player.speed - player.widthHalf) + 1, player.y + player.heightHalf-2))  && player.x > 1&& !isWall(getTile((player.x - player.speed -player.widthHalf) + 1, player.y - player.heightHalf ))){
       // Move player left by player speed
@@ -568,13 +593,13 @@ function input() {
 
 
     //s
-    if (83 in keysDown) {
+    if (83 in keysDown || 40 in keysDown) {
         horse=false;
     }
 
 
   // If D is Down
-  if (68 in keysDown) {
+  if (68 in keysDown || 39 in keysDown) {
     // Check if tile at player location after move is colliding with a wall
     if (!isWall(getTile(((player.x + player.widthHalf) + player.speed) - 1, player.y + player.heightHalf-2)) &&
      player.x + player.width < currentLevel[0].length * 32  &&
@@ -590,7 +615,7 @@ function input() {
 
     
   // If W is Down and Player's kinetic energy (in Y Axis) is 0
-  if (87 in keysDown && player.yke === 0) {
+  if ((87 in keysDown || 38 in keysDown) && player.yke === 0) {
     // Checks if tile directly above player is a wall
     if (!isWall(getTile(player.x-player.widthHalf,player.y -player.heightHalf) ) && !isWall(getTile(player.x -player.widthHalf ,player.y - player.heightHalf))){
     // Increase player's y axis kinetic energy by 8 (jump)
@@ -639,6 +664,26 @@ function input() {
 
 
   var t=getTile(player.x,player.y - 1);
+  if( col_to_zone( Math.floor(player.x / 32)) ==2){
+    if (player.y >water_level){
+      player.yke=10;
+      player.y-=player.heightHalf;
+      player_kill(1);
+    }else{
+      if(t=="castle_safe"){
+        player.gold+=15;
+        currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="castle_wall_0";
+      }
+      if(t=="castle_coin"){
+        player.gold+=5;
+        currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="castle_wall_1";
+      }
+
+    }
+
+  }
+
+  
   if(t=="heal"){
     player.health++;
     currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="0";
@@ -647,14 +692,25 @@ function input() {
     player.gold++;
     currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="0";
   }
+  
+  if(t=="switch_on"){
+    if(king){
+      currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="switch_off";
+      currentLevel[Math.floor(player.y / 32)+2][Math.floor(player.x / 32)]="water_off";
+      water_on=false;
+
+    }
+  }
+
   if(t=="stone_sword"){
     king=true;
     currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="stone";
   }
+
   if(t=="portal"){
     horse=true;
-    angel=false;
-    devil=false;    
+    //angel=false;
+    //devil=false;    
   }
   
   if(t=="safe"){
@@ -811,6 +867,21 @@ function randomLevel(l_height,l_width){
   for (let j = zone_1_end+1; j <= zone_2_end; j++){
     l[l_height-1][j] = "castle_floor_" + Math.floor(Math.random()*2.3) ;    
   }
+
+  l[l_height-1][zone_2_end-1] = "castle_floor_" + Math.floor(Math.random()*2.3) ;    
+  l[l_height-2][zone_2_end-1] = "castle_floor_" + Math.floor(Math.random()*2.3) ;    
+  l[l_height-3][zone_2_end-1] = "castle_floor_" + Math.floor(Math.random()*2.3) ;    
+  l[l_height-2][zone_2_end-2] = "castle_floor_" + Math.floor(Math.random()*2.3) ;    
+
+  l[l_height-6][zone_2_end-8] = "switch_on";        
+  l[l_height-5][zone_2_end-8] = "castle_floor_2";        
+  l[l_height-4][zone_2_end-8] = "water_on";        
+
+
+  l[l_height-2][zone_1_end+3] = "castle_safe";   
+  l[l_height-2][zone_1_end+4] = "castle_coin";   
+  l[l_height-2][zone_1_end+5] = "castle_coin";   
+  l[l_height-2][zone_1_end+6] = "castle_safe";   
   
   
   for (let j = zone_2_end+1; j <= l_width -1; j++){
