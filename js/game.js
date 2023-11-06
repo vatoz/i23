@@ -276,7 +276,7 @@ const basic_tiles = [
 "castle_err_",
 "castle_upper_","angel","portal",
 "ball_",
-"frost_","water_o","switch_o", "castle_coin","castle_safe"
+"frost_","water_o","switch_o", "castle_coin","castle_safe", "crush"
 
 ];
   // Loop through level lines
@@ -290,6 +290,16 @@ const basic_tiles = [
         }
       }
 
+      if(tick % 15 ==1){
+        if(currentLevel[row][col].startsWith("crush")){
+            for (let crushind=10;crushind>0;crushind--){
+                if(currentLevel[row][col]=="crush_"+crushind){
+                    currentLevel[row][col]="crush_"+(crushind+1);
+                }
+            }
+        } 
+      
+      }
       if (currentLevel[row][col] === "water") {       
         animate_water(col , row,150);
       }      
@@ -451,6 +461,11 @@ const basic_tiles = [
   }
   monstrum_draw();
 
+  var tt=getTile(player.x, player.y+player.heightHalf+1);
+  if(tt=="crush_0"){
+    
+    currentLevel[Math.floor((player.y+player.heightHalf+1) /32) ][Math.floor(player.x / 32)]="crush_1";
+  }
   
   
 
@@ -686,7 +701,7 @@ function isWall(a){
     "frost_",
     "castle_floor_",
     "grave",
-    "ball_"
+    "ball_","crush_1","crush_2","crush_3"
   ];
 
   for(let ind=0; ind<wall_tiles.length;ind++){
@@ -1018,6 +1033,10 @@ function randomLevel(l_height,l_width){
           if (Math.random()>0.45 ){
           var tile="castle_floor_"+Math.floor(Math.random()*2);
           }
+          if (Math.random()>0.85 ){
+          var tile="crush_0";
+          }
+          
         }
         if (Math.random()>0.88 ){
           var tile="castle_err_"+Math.floor(Math.random()*6);
