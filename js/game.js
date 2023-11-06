@@ -30,6 +30,7 @@ function drawDebug(x,y){
 let viewport_x=0;
 let tick=0;
 let killtick=0;
+let winner= false;
 
 // Object to hold user key presses
 let keysDown = {};
@@ -73,6 +74,7 @@ const player = {
   speed: 1,
   health:7,
   gold:1, 
+  mushroom:0,
   direction:0, 
   baloon:false
 }
@@ -170,7 +172,7 @@ function gravity(obj) {
   } else {
     // If Tile at object's feet location is a wall
     if (isWall(getTile(obj.x - obj.widthHalf, (obj.y + obj.heightHalf)))  || isWall(getTile(obj.x +obj.widthHalf, (obj.y + obj.heightHalf)))) {
-      if(getTile(obj.x , (obj.y + obj.heightHalf)  ).startsWith("ball")){
+      if(getTile(obj.x , (obj.y + obj.heightHalf)  ).startsWith("ball")|| getTile(obj.x , (obj.y + obj.heightHalf)  ).startsWith("win") ){
         if (obj.yke < 0){
           // na míčích se skáče
           obj.yke = -obj.yke;
@@ -276,7 +278,8 @@ const basic_tiles = [
 "castle_err_",
 "castle_upper_","angel","portal",
 "ball_",
-"frost_","water_o","switch_o", "castle_coin","castle_safe", "crush"
+"frost_","water_o","switch_", "castle_coin","castle_safe", "crush",
+"winner","mushroom"
 
 ];
   // Loop through level lines
@@ -295,6 +298,9 @@ const basic_tiles = [
             for (let crushind=10;crushind>0;crushind--){
                 if(currentLevel[row][col]=="crush_"+crushind){
                     currentLevel[row][col]="crush_"+(crushind+1);
+                    if(crushind==10){
+                      currentLevel[row][col]="crushed";
+                    }
                 }
             }
         } 
@@ -486,13 +492,20 @@ const basic_tiles = [
     sprite_draw("devil", 16+16+16+16+player.health*16,0);
   }
 
-  for(let h=0;h<player.gold %5;h++){
-    sprite_draw("gold",512-32- (h*16) ,0);
-  }
-  if(player.gold>5){
-    for(let h=0;h<((player.gold - (player.gold %5))/5);h++){
-      sprite_draw("money",512-32- ((h+(player.gold %5))*16) ,0);
-   }
+  if(!winner){
+    for(let h=0;h<player.gold %5;h++){
+      sprite_draw("gold",512-32- (h*16) ,0);
+    }
+    if(player.gold>5){
+      for(let h=0;h<((player.gold - (player.gold %5))/5);h++){
+        sprite_draw("money",512-32- ((h+(player.gold %5))*16) ,0);
+    }
+    }
+  }else{
+    for(let h=0;h<player.mushroom ;h++){
+      sprite_draw("mushroom_3",512-32- (h*16) ,0);
+    }
+
   }
 
   tick++;
@@ -557,7 +570,12 @@ function monstrum_draw(){
       c.lineTo(monstrum[i].ex -viewport_x, monstrum[i].ey);
       c.stroke();
     }
-    sprite_draw("evil_0",monstrum[0].x -32 -viewport_x,monstrum[0].y -32);
+    if(!winner){
+      sprite_draw("evil_0",monstrum[0].x -32 -viewport_x,monstrum[0].y -32);
+    }else{
+      sprite_draw("evil_1",monstrum[0].x -32 -viewport_x,monstrum[0].y -32);
+    }
+    
 }
 
 
@@ -598,7 +616,7 @@ function recalc_noha(noha,fighting,reset){
   let fight=false;
 
       if(Math.abs(player.y- monstrum[0].by-30)>20){
-      if(player.y>monstrum[0].by+30){
+      if(player.y>monstrum[0].by+30 ){
         monstrum[0].by+=0.8;
       }else{
         monstrum[0].by-=.4;        
@@ -608,20 +626,21 @@ function recalc_noha(noha,fighting,reset){
     monstrum[0].y=    monstrum[0].by + Math.sin(tick/64)*4 ;        
     
     
-
+    
     if(player.x>monstrum[0].x){
-      monstrum[0].x+=0.22;
+      if (monstrum[0].x+50<zone_1_end*32 ||winner ){ monstrum[0].x+=0.22; }
     }else{
       monstrum[0].x-=0.22;
     }
 
     if(Math.abs(player.x-monstrum[0].x)>300){
-      if(player.x>monstrum[0].x){
-        monstrum[0].x+=5;
-      }else{
-        monstrum[0].x-=5;
+      if (monstrum[0].x+50<zone_1_end*32 ||winner ){
+        if(player.x>monstrum[0].x){
+          if (monstrum[0].x+50<zone_1_end*32 ){monstrum[0].x+=5;}
+        }else{
+          monstrum[0].x-=5;
+        }
       }
-
     }
 
     
@@ -660,21 +679,9 @@ function recalc_noha(noha,fighting,reset){
 }
 
 
-
-
-
-  
-
-
-
-
-
-
-
-
-
 function player_kill(li){
   if(tick-killtick<100) return false;
+  if(winner) return false;
 
   player.health -=li;
   if(player.health<=0){
@@ -686,8 +693,9 @@ function player_kill(li){
       player.x=256;
       player.y=0;
       chilli=false;
-      king=false;
-      angel=false;
+      devil=false;
+     // king=false;
+      //angel=false;
   }else{
     killtick=tick;
     
@@ -701,7 +709,7 @@ function isWall(a){
     "frost_",
     "castle_floor_",
     "grave",
-    "ball_","crush_1","crush_2","crush_3"
+    "ball_","crush_1","crush_2","crush_3","winner"
   ];
 
   for(let ind=0; ind<wall_tiles.length;ind++){
@@ -885,13 +893,56 @@ function input() {
     player.gold++;
     currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="0";
   }
+
+  if(t=="bed"){
+    winner=true;
+    chilli=false;
+    player.health=1;
+    
+    player.mushroom+=player.gold;
+    player.gold;
+
+    let delka =currentLevel[0].length;
+    let vyska= currentLevel.length;
+    currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="safe";
+
+    currentLevel[vyska-2][delka-3]="winner_3";
+    currentLevel[vyska-2][delka-4]="winner_0";
+    currentLevel[vyska-2][delka-5]="winner_2";
+    currentLevel[vyska-3][delka-4]="winner_1";
+
+    currentLevel[vyska-3][zone_1_end+1]="0";//pruchozi hrad
+    
+    
+    player.x=(delka -3.5)*32;
+    player.y=(vyska -4)*32;
+
+    let hidetiles=["portal","chilli", "gold","safe","heal","stone"];
+    // Loop through level lines
+    for (let row = 0; row < currentLevel.length -1; row++) {
+    // Loop through each character in line
+      for (let col = 0; col < currentLevel[0].length; col++) {
+      // If character is 1 (a wall) 
+        for(let ind=0; ind<hidetiles.length;ind++){
+          if(currentLevel[row][col]== hidetiles[ind]){
+            currentLevel[row][col]="mushroom_" + Math.floor(Math.random()*5);
+          }
+        }
+        if(  currentLevel[row][col]=="0" && isWall( currentLevel[row+1][col]) && Math.random()>0.93){
+          currentLevel[row][col]="mushroom_" + Math.floor(Math.random()*5);
+
+        }
+      }    
+    }    
+  }
   
-  if(t=="switch_on"){
-    if(king){
+  if(t=="switch_on" || t=="switch_pin"){
+    if(king||winner){
       currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="switch_off";
       currentLevel[Math.floor(player.y / 32)+2][Math.floor(player.x / 32)]="water_off";
       water_on=false;
-
+    }else{
+      currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="switch_pin";  
     }
   }
 
@@ -910,6 +961,12 @@ function input() {
     player.gold+=15;
     currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="0";
   }
+
+  if(t.startsWith("mushroom")){
+    player.mushroom++;
+    currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="0";
+  }
+
   if(t=="chilli"){
     if(!chilli){
       chilli=true;
@@ -990,10 +1047,10 @@ function randomLevel(l_height,l_width){
   for (let j =  zone_1_end+2;j<zone_2_end; j++){
     const random=  Math.random();
     cur_hrad=last_hrad;
-    if(random>0.9){
+    if(random>0.95){
               cur_hrad=Math.floor(Math.random()*l_height);
     }else if (cur_hrad<l_height-3 && random > 0.7){
-      cur_hrad+=3;
+      cur_hrad+=2;
     }else if( cur_hrad>3 && random > 0.5){
       cur_hrad--; 
     }
