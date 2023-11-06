@@ -36,6 +36,7 @@ let keysDown = {};
 // Will hold Current Level data
 let currentLevel;
 
+let monstrum=[];
 let clouds=[];
 let craters=[];
 let droplets=[];
@@ -122,6 +123,7 @@ function main() {
       player.y=-player.height;
     }
   }
+  monstrum_animate();
   
   // Draw Stuff
   draw();
@@ -221,6 +223,10 @@ function draw_clouds(level){
 
 }
 
+
+
+
+
 function draw() {
   
   // Erase Everything on Canvas
@@ -260,7 +266,7 @@ function draw() {
 
 
   // Set the fill colour to black
-  c.fillStyle = "black";
+c.fillStyle = "black";
 const basic_tiles = [ 
 "floor_", 
 "castle_floor_","grave","cimburi" ,
@@ -440,6 +446,11 @@ const basic_tiles = [
         
     }
 
+  if(touch_player(monstrum[0].x,monstrum[0].y,25) ){
+      player_kill(1);
+  }
+  monstrum_draw();
+
   
   
 
@@ -477,6 +488,173 @@ const basic_tiles = [
   }
 
 }
+
+function downAngle(angle){//to rad
+  return ((.5-  (angle/180))*Math.PI);
+}
+
+function nohag(x,y,delka,azimut){
+  console.log(azimut);
+  return {x:x,y:y,ex:x+Math.sin(azimut)*delka  ,ey:y+Math.cos(azimut)*delka,l:delka,angle:azimut,
+  bx:x,by:y
+  };
+}
+
+function monstrum_init(){
+    let telo={x:150,y:160,by:200};
+    monstrum.push(telo);
+    monstrum.push( nohag( 10,28, 60,  downAngle(110) ));
+    monstrum.push( nohag( -10,28, 60, downAngle(-110)));
+
+    monstrum.push( nohag( 15,25, 55, downAngle(120)));
+    monstrum.push( nohag( -15,25, 55, downAngle(-120)));
+
+    monstrum.push( nohag( 22,17, 50, downAngle(130)));
+    monstrum.push( nohag( -22,17, 50, downAngle(-130)));
+
+
+    monstrum.push( nohag( 10,30, 70, downAngle(45)));
+    monstrum.push( nohag( -10,30, 70, downAngle(-45)));
+
+    monstrum.push( nohag( 15,25, 60, downAngle(45)));
+    monstrum.push( nohag( -15,25, 60, downAngle(-45)));
+
+    monstrum.push( nohag( 22,17, 50, downAngle(45)));
+    monstrum.push( nohag( -22,17, 50, downAngle(-45)));
+}
+
+function monstrum_draw(){
+    
+
+    for(let i=1;i<7;i++){
+      c.fillStyle = "gray";
+      c.moveTo(monstrum[i].x-viewport_x, monstrum[i].y-2);
+      c.lineTo(monstrum[i].ex-viewport_x, monstrum[i].ey-1);
+      c.stroke();
+      
+      sprite_draw("kloub_" + (i-1),monstrum[i].ex -4 - viewport_x,monstrum[i].ey -4);
+
+    }
+
+    for(let i=7;i<13;i++){
+      c.fillStyle = "gray";
+      c.moveTo(monstrum[i].x -viewport_x, monstrum[i].y);
+      c.lineTo(monstrum[i].ex -viewport_x, monstrum[i].ey);
+      c.stroke();
+    }
+    sprite_draw("evil_0",monstrum[0].x -32 -viewport_x,monstrum[0].y -32);
+}
+
+
+
+
+function recalc_noha(noha,fighting,reset){
+
+  var tX=monstrum[noha].x + (Math.cos(monstrum[noha].angle)*monstrum[noha].l);
+  var tY=monstrum[noha].y + (Math.sin(monstrum[noha].angle)*monstrum[noha].l);
+
+  if(reset){
+    monstrum[noha].ex=tX;
+    monstrum[noha].ey=tY;    
+  }
+
+  if( noha==7 || noha== 10){
+    tY-=(tY  % 32);
+    tX-=(tX  % 32);
+    //console.log(tX/32);
+  }
+
+
+
+  
+    monstrum[noha].ex+=  (tX -monstrum[noha].ex)/10;
+    monstrum[noha].ey+=  (tY -monstrum[noha].ey)/10;
+
+  
+
+//  monstrum[noha].ex=monstrum[noha].x + Math.cos(rad)*oldelka;
+//  monstrum[noha].ey=monstrum[noha].y + Math.sin(rad)*oldelka;
+
+
+
+}
+
+ function monstrum_animate(){
+  let fight=false;
+
+      if(Math.abs(player.y- monstrum[0].by-30)>20){
+      if(player.y>monstrum[0].by+30){
+        monstrum[0].by+=0.8;
+      }else{
+        monstrum[0].by-=.4;        
+      }
+    }
+
+    monstrum[0].y=    monstrum[0].by + Math.sin(tick/64)*4 ;        
+    
+    
+
+    if(player.x>monstrum[0].x){
+      monstrum[0].x+=0.22;
+    }else{
+      monstrum[0].x-=0.22;
+    }
+
+    if(Math.abs(player.x-monstrum[0].x)>300){
+      if(player.x>monstrum[0].x){
+        monstrum[0].x+=5;
+      }else{
+        monstrum[0].x-=5;
+      }
+
+    }
+
+    
+    let noha = 1+(    Math.floor(tick/12) %6);
+    if(Math.abs(player.x - monstrum[0].x ) <100){
+        //if(player.x >monstrum[0].x){noha=1;} else{noha=4;}
+        //let fight=true;
+
+    }
+
+
+    for(let i=1;i<7;i++){ //nohy musí růst z těla
+      monstrum[i].x= monstrum[0].x +monstrum[i].bx;
+      monstrum[i].y= monstrum[0].y +monstrum[i].by;      
+      if(tick<2)  recalc_noha(i,fight,true);
+    }
+
+
+    recalc_noha(noha,fight,false);
+
+  for(let i=7;i<13;i++){ //spodní články z horních
+    monstrum[i].x= monstrum[i-6].ex;
+    monstrum[i].y= monstrum[i-6].ey;      
+    if(tick<2)  recalc_noha(i,fight,true);    
+  }
+
+    recalc_noha(noha+6,fight,false);
+
+
+    
+
+
+
+
+   
+}
+
+
+
+
+
+  
+
+
+
+
+
+
 
 
 
@@ -1086,6 +1264,7 @@ window.onload = function () {
   // currentLevel = parseLevel(level);
   currentLevel = randomLevel(16, 100 );
   initClouds(570);
+  monstrum_init();
   // Start Platformer
   main();
 }
