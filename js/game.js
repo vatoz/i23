@@ -37,6 +37,8 @@ let keysDown = {};
 // Will hold Current Level data
 let currentLevel;
 
+let sparkles=[];
+let sparkling=false;
 let monstrum=[];
 let clouds=[];
 let craters=[];
@@ -234,6 +236,7 @@ function draw() {
   // Erase Everything on Canvas
   c.clearRect(0, 0, canvas.width, canvas.height);
   let vWidth=currentLevel[0].length *32;
+
   //.sky-gradient-14 { background: linear-gradient(to bottom, #2d91c2 0%,#1e528e 100%); }
   //#9be2fe 0%,#67d1fb 100%
   // Create gradient
@@ -333,6 +336,38 @@ const basic_tiles = [
       
     }
   }
+
+  
+
+  if (sparkling&&Math.random()>0.7){
+    sparkles.push (
+      {x: player.x + Math.floor((Math.random()-0.5)*player.width ),
+        y:player.y + Math.floor((Math.random()-0.5)*player.height ) , 
+        vx:3*(Math.random()-0.5),
+        vy:3*(Math.random()-0.5)
+      }
+    );
+  }
+
+  if(sparkling && sparkles.length>64){
+    while(sparkles.length>10 &&sparkles[0].y>512){
+      sparkles.shift();
+    }
+  }
+
+  if(sparkling){
+    for(let sparkle_ind=0;sparkle_ind<sparkles.length;sparkle_ind++){
+      sprite_draw("sparkle_"+ Math.floor(Math.random()*4),
+      sparkles[sparkle_ind].x-viewport_x,sparkles[sparkle_ind].y      
+      );
+
+      sparkles[sparkle_ind].y+=sparkles[sparkle_ind].vy;
+      sparkles[sparkle_ind].x+=sparkles[sparkle_ind].vx;
+      sparkles[sparkle_ind].vy+=0.01;
+      //sparkles[sparkle_ind].vx= sparkles[sparkle_ind].vx*.09;
+    }
+  }
+
 
   if(!player.baloon){
     var p_sprite="human";
@@ -911,11 +946,29 @@ function input() {
     currentLevel[vyska-2][delka-5]="winner_2";
     currentLevel[vyska-3][delka-4]="winner_1";
 
-    currentLevel[vyska-3][zone_1_end+1]="0";//pruchozi hrad
+    currentLevel[vyska-4][zone_1_end+1]="0";//pruchozi hrad
     
     
     player.x=(delka -3.5)*32;
     player.y=(vyska -4)*32;
+
+    sparkling=true;
+
+    for(let sparklec=0;sparklec<5;sparklec++){
+      let sx=player.x -Math.random()*400;
+      let sy=100 +Math.random()*400;
+      let spd=.3+Math.random();
+      for (let sparkli=0;sparkli<150;sparkli++){
+        sparkles.push({
+          x:sx,
+          y:sy,
+          vx:Math.sin(2*Math.PI*sparkli/150  )*spd   + 0.06*(Math.random()-0.5),
+          vy:Math.cos(2*Math.PI*sparkli/150  )*spd   + 0.06*(Math.random()-0.5)
+      })
+    }
+  }
+
+
 
     let hidetiles=["portal","chilli", "gold","safe","heal","stone"];
     // Loop through level lines
