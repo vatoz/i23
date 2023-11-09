@@ -372,9 +372,9 @@ const basic_tiles = [
   if(!player.baloon){
     var p_sprite="human";
     if(player.direction >0){
-        p_sprite="human_r_"+ Math.floor(player.direction  % 2 );
+        p_sprite="human_r_"+ Math.floor((player.direction/2)  % 8 );
     }else if(player.direction <0){
-      p_sprite="human_l_"+  Math.floor((-player.direction)  % 2 );;
+      p_sprite="human_l_"+  Math.floor((-player.direction/2)  % 8 );;
     }else{
       p_sprite="human";
     }
