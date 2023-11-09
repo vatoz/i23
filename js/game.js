@@ -649,9 +649,18 @@ function recalc_noha(noha,fighting,reset){
 
  function monstrum_animate(){
   let fight=false;
+  let tarx=player.x;
+  let tary=player.y;
 
-      if(Math.abs(player.y- monstrum[0].by-30)>20){
-      if(player.y>monstrum[0].by+30 ){
+  if(winner){
+    tarx+= Math.sin(tick/50)*200;
+    tary+= Math.cos(tick/50)*200;
+  }
+
+
+
+      if(Math.abs(tary- monstrum[0].by-30)>20){
+      if(tary>monstrum[0].by+30 ){
         monstrum[0].by+=0.8;
       }else{
         monstrum[0].by-=.4;        
@@ -662,15 +671,15 @@ function recalc_noha(noha,fighting,reset){
     
     
     
-    if(player.x>monstrum[0].x){
+    if(tarx>monstrum[0].x){
       if (monstrum[0].x+50<zone_1_end*32 ||winner ){ monstrum[0].x+=0.22; }
     }else{
       monstrum[0].x-=0.22;
     }
 
-    if(Math.abs(player.x-monstrum[0].x)>300){
+    if(Math.abs(tarx-monstrum[0].x)>300){
       if (monstrum[0].x+50<zone_1_end*32 ||winner ){
-        if(player.x>monstrum[0].x){
+        if(tarx>monstrum[0].x){
           if (monstrum[0].x+50<zone_1_end*32 ){monstrum[0].x+=5;}
         }else{
           monstrum[0].x-=5;
