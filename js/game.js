@@ -860,6 +860,7 @@ function input() {
     //s
     if (83 in keysDown || 40 in keysDown) {
         horse=false;
+        player.speed=2;
     }
 
 
@@ -961,6 +962,8 @@ function input() {
   if(t=="bed"){
     winner=true;
     chilli=false;
+    horse=false;
+    player.speed=2;
     player.health=1;
     
     player.mushroom+=player.gold;
@@ -1035,6 +1038,7 @@ function input() {
 
   if(t=="portal"){
     horse=true;
+    player.speed=4;
     //angel=false;
     //devil=false;    
   }
@@ -1340,13 +1344,13 @@ function randomLevel(l_height,l_width){
           
           } else if(random>0.78 && !haveangel){
             l[i][j]="angel";
-            haveangel=true;
-
-
+            haveangel=true;      
           }else if (random>0.77 && isWall(l[i+1][j])){
             l[i][j]="ball_"+ Math.floor(Math.random()*6);
           }else if (random>0.4 &&col_to_zone(j)==2 ){
             l[i][j]="portal";
+          }else if(random>0.74){
+            l[i][j]="mushroom_" + Math.floor(Math.random()*5);
           }
 
           }
