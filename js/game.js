@@ -978,7 +978,7 @@ function input() {
     currentLevel[vyska-2][delka-5]="winner_2";
     currentLevel[vyska-3][delka-4]="winner_1";
 
-    
+    currentLevel[vyska-4][zone_1_end+1]="0";//pruchozi hrad
     
     
     player.x=(delka -3.5)*32;
