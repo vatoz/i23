@@ -31,7 +31,7 @@ let viewport_x=0;
 let tick=0;
 let killtick=0;
 let winner= false;
-let grow=true;
+let grow=false;
 
 // Object to hold user key presses
 let keysDown = {};
