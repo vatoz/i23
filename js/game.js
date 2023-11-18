@@ -31,6 +31,7 @@ let viewport_x=0;
 let tick=0;
 let killtick=0;
 let winner= false;
+let grow=true;
 
 // Object to hold user key presses
 let keysDown = {};
@@ -188,7 +189,7 @@ function gravity(obj) {
         // Set Y Kinetic Energy to 0
         obj.yke = 0;
         // Minus object's Y value so it sits directly on the floor 
-        obj.y -= (obj.y % 32)-obj.height;
+        obj.y -= ((obj.y+obj.heightHalf) % 32);
         obj.y= Math.floor(obj.y);
         
       }
@@ -208,6 +209,19 @@ function sprite_draw(spritename,x,y){
     console.log ("Missing sprite:" + spritename);
   }    
 }
+
+function sprite_draw_scale(spritename,x,y,scale){
+  let nx=Math.floor(x);
+  let ny=Math.floor(y);
+  if(sprites[spritename]){
+    console.log("scale:"+scale);
+    c.drawImage(img,sprites[spritename].x,sprites[spritename].y,sprites[spritename].w,sprites[spritename].h,nx,ny,scale,scale );
+  }else{
+    console.log ("Missing sprite:" + spritename);
+  }    
+}
+
+
 
 function draw_clouds(level){
   var lbound=Math.floor((level-1)/4  * clouds.length);
@@ -282,7 +296,7 @@ const basic_tiles = [
 "castle_upper_","angel","portal",
 "ball_",
 "frost_","water_o","switch_", "castle_coin","castle_safe", "crush",
-"winner","mushroom"
+"winner","mushroom","poison"
 
 ];
   // Loop through level lines
@@ -389,7 +403,13 @@ const basic_tiles = [
     }
     
     if(king && !horse) sprite_draw("king" ,player.x-16- viewport_x,player.y-32+(player.height/2));
-    sprite_draw(p_sprite ,player.x-16- viewport_x,player.y-32+(player.height/2));
+    if(!grow){
+      sprite_draw(p_sprite ,player.x-16- viewport_x,player.y-32+(player.height/2));
+    }else{      
+      spritesize=Math.floor(32* player.height/22);
+      sprite_draw_scale(p_sprite ,player.x-(spritesize/2)- viewport_x,player.y-spritesize+(player.height/2),spritesize,spritesize);
+      drawDebug(player.x,player.y);
+    }
   }
 
   if(player.baloon){
@@ -397,10 +417,10 @@ const basic_tiles = [
   }
 
   
-  //drawDebug(player.x-player.widthHalf,player.y+player.heightHalf);
-  //drawDebug(player.x+player.widthHalf,player.y-player.heightHalf);
-  //drawDebug(player.x-player.widthHalf,player.y-player.heightHalf);
-  //drawDebug(player.x+player.widthHalf,player.y+player.heightHalf);
+  drawDebug(player.x-player.widthHalf,player.y+player.heightHalf);
+  drawDebug(player.x+player.widthHalf,player.y-player.heightHalf);
+  drawDebug(player.x-player.widthHalf,player.y-player.heightHalf);
+  drawDebug(player.x+player.widthHalf,player.y+player.heightHalf);
 
   const front_tiles = [ "bed","crater","chilli","heal","gold","safe" ,"stone","stone_sword"];
   for (let row = 0; row < currentLevel.length; row++) {
@@ -955,7 +975,7 @@ function input() {
     currentLevel[vyska-2][delka-5]="winner_2";
     currentLevel[vyska-3][delka-4]="winner_1";
 
-    currentLevel[vyska-4][zone_1_end+1]="0";//pruchozi hrad
+    
     
     
     player.x=(delka -3.5)*32;
@@ -1027,6 +1047,13 @@ function input() {
   if(t.startsWith("mushroom")){
     player.mushroom++;
     currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="0";
+    if(grow){
+        player.width+=2;
+        player.widthHalf+=1;
+        player.height+=2;
+        player.heightHalf+=1;   
+        player.y-=30;   
+    }
   }
 
   if(t=="chilli"){
@@ -1039,10 +1066,9 @@ function input() {
     angel=true;
     //currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="0";
   }
-
-
-
-
+  if(t=="poison"){
+    grow=true;
+  }
 
   //todo zvladat nepadat
   //lepeni na vlakne
@@ -1375,7 +1401,17 @@ function randomLevel(l_height,l_width){
   l[l_height-2][l_width-2]="0";
   l[l_height-3][l_width-2]="0";
   l[l_height-2][l_width-2]="0";
-  l[l_height-2][l_width-2]="bed";
+
+
+  l[l_height-4][l_width-4]="bed";
+  l[l_height-2][l_width-2]="poison";
+  l[l_height-2][l_width-3]="floor_3";
+  l[l_height-2][l_width-4]="floor_0";
+  l[l_height-2][l_width-5]="floor_2";
+  l[l_height-3][l_width-4]="floor_1";
+
+
+
   l[1][4]="0";
   l[2][4]="0";
 
