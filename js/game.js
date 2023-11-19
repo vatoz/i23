@@ -2,6 +2,7 @@
 const c = document.getElementById("canvas").getContext("2d");
 let img = new Image();
 img.src = "sprites0.png";
+let proverbs=[];
 
 
 const zone_1_end = 50;
@@ -10,6 +11,22 @@ function col_to_zone(col) {
   if (col <= zone_1_end) return 1;
   if (col <= zone_2_end) return 2;
   return 3;
+}
+
+function say(text){
+  if(proverbs.length>1){
+    if(proverbs[proverbs.length-1].txt==text){
+      proverbs[proverbs.length-1].time=tick;
+      return false;
+    }
+  }
+
+    proverbs.push(  
+    {
+      txt:text,
+      time:tick
+    });
+
 }
 
 function drawDebug(x, y) {
@@ -237,13 +254,7 @@ function draw_clouds(level) {
     sprite_draw(imga, pos - (currentLevel[0].length * 32) - viewport_x, cloud.y);
     sprite_draw(imga, pos + (currentLevel[0].length * 32) - viewport_x, cloud.y);
   }
-
-
 }
-
-
-
-
 
 function draw() {
 
@@ -457,6 +468,7 @@ function draw() {
         sprite_draw("baloon_0", (col * 32 - viewport_x) - 16, row * 32 - 32); //nestandartni velikost
         if (touch_player(col * 32 + 15, row * 32 + 15, 3)) {
           currentLevel[row][col] = "0";
+          say("Proletím se!");
           player.baloon = true;
         }
       }
@@ -482,7 +494,7 @@ function draw() {
         c.lineTo(col * 32 + 15 - viewport_x, row * 32 + offset + 10);
         c.stroke();
         if (touch_player(col * 32 + 15, row * 32 + offset + 10, 10)) {
-          player_kill(1);
+          player_kill(1, "Au, pavouku nech mě.");
         }
 
         sprite_draw("spider", col * 32 - viewport_x, row * 32 + offset - 10);
@@ -499,7 +511,7 @@ function draw() {
       sprite_draw("meteor", crater.x - viewport_x, y);
     }
     if (touch_player(crater.x + 16, y + 16, 10)) {
-      player_kill(1);
+      player_kill(1, "Au, meteorit. Ještě že nejsem dinosaur.");
     }
 
     if (y < crater.y + 10) {
@@ -519,13 +531,13 @@ function draw() {
   }
 
   if (touch_player(monstrum[0].x, monstrum[0].y, 25)) {
-    player_kill(1);
+    player_kill(1,"Obludo, fuj je to!");
   }
   monstrum_draw();
 
   var tt = getTile(player.x, player.y + player.heightHalf + 1);
   if (tt == "crush_0") {
-
+    say("Hrad se celý rozpadá");
     currentLevel[Math.floor((player.y + player.heightHalf + 1) / 32)][Math.floor(player.x / 32)] = "crush_1";
   }
 
@@ -564,9 +576,22 @@ function draw() {
 
   }
 
+  c.font = "16px serif";
+  
+  if(proverbs.length>0) {
+    if (proverbs[0].time + 30*25<tick){
+      proverbs.shift();
+    }
+  }
+  c.fillStyle = "black";
+  for( let message_index=0; message_index<proverbs.length;message_index++){
+    c.fillText(proverbs[message_index].txt, 5,40+ (18*(proverbs.length  - message_index)));    
+  }
+
+
   tick++;
-  if (!water_on && water_level < (15 * 32 - 5)) {
-    if (tick % 25 == 1) {
+  if (!water_on && water_level < (15 * 32 - 2)) {
+    if (tick % 20 == 1) {
       water_level++;
     }
   }
@@ -745,12 +770,14 @@ function monstrum_animate() {
 }
 
 
-function player_kill(li) {
+function player_kill(li, txt) {
   if (tick - killtick < 100) return false;
   if (winner) return false;
 
+  say(txt);
   player.health -= li;
   if (player.health <= 0) {
+    say("... ale tak to přeci neskončilo, viď?" );
     //todo GAME over
     if (0 < player.y < 512 && 0 < player.x < currentLevel[0].length * 32) {
       currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)] = "grave";
@@ -896,6 +923,7 @@ function input() {
           currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)] = "chilli";
           chillicount++;
           if (chillicount == 5) {
+            say("To bylo vostrý čili!S");
             devil = true;
           }
         }
@@ -936,13 +964,15 @@ function input() {
     if (player.y > water_level) {
       player.yke = 10;
       player.y -= player.heightHalf;
-      player_kill(1);
+      player_kill(1,"Žbluňk, brr, ta voda je ale mokrá a studená.");
     } else {
       if (t == "castle_safe") {
         player.gold += 15;
+        say("Poklad hradního pána, to si nechám líbit.");
         currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)] = "castle_wall_0";
       }
       if (t == "castle_coin") {
+        say("Zlato hradního pána.");
         player.gold += 5;
         currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)] = "castle_wall_1";
       }
@@ -953,15 +983,19 @@ function input() {
 
 
   if (t == "heal") {
+    say("Hned je mi líp.");
     player.health++;
     currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)] = "0";
   }
   if (t == "gold") {
+    say("Penízky!");
     player.gold++;
     currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)] = "0";
   }
 
   if (t == "bed") {
+    say("Hurá, jsem vítěz. Projdu si mapu ještě jednou, třeba se něco změnilo.");
+
     winner = true;
     chilli = false;
     horse = false;
@@ -1025,20 +1059,24 @@ function input() {
 
   if (t == "switch_on" || t == "switch_pin") {
     if (king || winner) {
+      say("Zkusím tohle přepnout.");
       currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)] = "switch_off";
       currentLevel[Math.floor(player.y / 32) + 2][Math.floor(player.x / 32)] = "water_off";
       water_on = false;
     } else {
+      say("Nějak to nefunguje. Prý nejsem král.");
       currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)] = "switch_pin";
     }
   }
 
   if (t == "stone_sword") {
+    say("Meč zabodnutý do kamene, ten se mi líbí. Beru!");
     king = true;
     currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)] = "stone";
   }
 
   if (t == "portal") {
+    say("Hyjé koníčku. Šipka dolů nebo S mi pomůže slézt");
     horse = true;
     player.speed = 4;
     //angel=false;
@@ -1046,34 +1084,43 @@ function input() {
   }
 
   if (t == "safe") {
+    say("To je peněz, budu boháč.");
     player.gold += 15;
     currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)] = "0";
   }
 
-  if (t.startsWith("mushroom")) {
+  if (t.startsWith("mushroom")) {    
     player.mushroom++;
     currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)] = "0";
     if (grow) {
+      say("Ham. V břiše mi škrundá.");
       player.width += 2;
       player.widthHalf += 1;
       player.height += 2;
       player.heightHalf += 1;
       player.y -= 30;
+    }else{
+      say("Ham.");
     }
   }
 
   if (t == "chilli") {
     if (!chilli) {
       chilli = true;
-      player_kill(1);
+      player_kill(1, "Pekelně pikantní.");
     }
   }
   if (t == "angel") {
     angel = true;
+    say("Andělé nade mnou bdí.");
     //currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)]="0";
   }
   if (t == "poison") {
-    grow = true;
+    if(!grow){
+      say("Lahvička s nápisem VYPIJ MĚ! Ale jen mi po ní škrundá v břiše.");
+      grow = true;
+      
+    }
   }
 
   //todo zvladat nepadat
@@ -1446,5 +1493,6 @@ window.onload = function () {
   initClouds(570);
   monstrum_init();
   // Start Platformer
+  say("Blíží se noc, čas zalézt to postele.")
   main();
 }
