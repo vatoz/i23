@@ -68,6 +68,7 @@ let king = false;
 let angel = false;
 let devil = false;
 let horse = false;
+let gondor = false;
 
 let water_on = true;
 let water_level = (16 - 3) * 32;
@@ -279,7 +280,12 @@ function draw() {
 
 
   draw_clouds(4);
-  sprite_draw("grass_3", - (viewport_x - 256) / (vWidth - 512) * (580 - 512), 512 - 32 - 156);
+  if(gondor){
+    sprite_draw("grass_4", - (viewport_x - 256) / (vWidth - 512) * (580 - 512), 512 - 32 - 156);
+  }else{
+    sprite_draw("grass_3", - (viewport_x - 256) / (vWidth - 512) * (580 - 512), 512 - 32 - 156);
+  }
+  
   draw_clouds(3);
   sprite_draw("grass_2", - (viewport_x - 256) / (vWidth - 512) * (630 - 512), 512 - 32 - 120);
   draw_clouds(2);
@@ -923,7 +929,7 @@ function input() {
           currentLevel[Math.floor(player.y / 32)][Math.floor(player.x / 32)] = "chilli";
           chillicount++;
           if (chillicount == 5) {
-            say("To bylo vostrý čili!S");
+            say("To bylo vostrý čili!");
             devil = true;
           }
         }
@@ -947,6 +953,15 @@ function input() {
     viewport_x = player.x - 256;
   } else {
     viewport_x = 0;
+    if(winner){
+      gondor=true;
+      proverbs=[];
+      say("Tohle je konec hry!")
+      say("Ale to už je jiný příběh.");
+
+      say( "Majáky vzplály! Gondor volá o pomoc! ");
+
+    }
   }
   if (viewport_x > currentLevel[0].length * 32 - 512) {
     viewport_x = currentLevel[0].length * 32 - 512;
